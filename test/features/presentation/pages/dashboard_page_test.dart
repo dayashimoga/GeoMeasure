@@ -24,10 +24,15 @@ void main() {
       'Measure Room Enclosure',
     );
     expect(executeBtn, findsOneWidget);
-    await tester.tap(executeBtn);
+
+    await tester.ensureVisible(executeBtn);
+    await tester.pumpAndSettle();
+    await tester.tap(executeBtn, warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(find.text('Export DXF'), findsOneWidget);
-    expect(find.text('Export CSV'), findsOneWidget);
+    final exportDxf = find.text('Export DXF');
+    expect(exportDxf, findsOneWidget);
+    final exportCsv = find.text('Export CSV');
+    expect(exportCsv, findsOneWidget);
   });
 }
