@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../../../core/usecases/usecase.dart';
+import 'package:geomeasure/core/usecases/usecase.dart';
 import '../../domain/entities/capability_profile.dart';
 import '../../domain/usecases/detect_capabilities_usecase.dart';
 

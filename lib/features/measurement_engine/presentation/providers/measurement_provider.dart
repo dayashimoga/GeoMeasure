@@ -18,7 +18,7 @@ class MeasurementProvider extends ChangeNotifier {
   MeasurementResult? _lastResult;
   SpatialShape? _lastShape;
   CapabilityProfile? _lastProfile;
-  List<MeasurementResult> _history = [];
+  final List<MeasurementResult> _history = [];
 
   AreaUnit get targetAreaUnit => _targetAreaUnit;
   DistanceUnit get targetDistanceUnit => _targetDistanceUnit;

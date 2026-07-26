@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geomeasure/features/capability_detection/domain/entities/capability_profile.dart';
 import 'package:geomeasure/features/measurement_engine/domain/entities/spatial_shape.dart';
 import 'package:geomeasure/features/measurement_engine/domain/services/geodetic_calculator.dart';
 
