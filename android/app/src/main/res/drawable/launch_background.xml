@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="512dp"
-    android:width="512dp"
-    android:viewportHeight="512"
-    android:viewportWidth="512">
-    <path
-        android:fillColor="#0175C2"
-        android:pathData="M0,0h512v512h-512z"/>
-</vector>
+<!-- Launch screen background: solid color fill while Flutter engine initializes -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/white" />
+    <!-- Optional: Add a branded splash image centered on the screen
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
+    </item>
+    -->
+</layer-list>

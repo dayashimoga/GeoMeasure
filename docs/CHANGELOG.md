@@ -1,36 +1,85 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to GeoMeasure are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [1.1.0] - 2026-07-26 — Gap Analysis & Production Hardening
+## [2.2.0] - 2026-07-26
+
+### Added
+- **Excel exporter** — pure Dart XLSX generator (Open XML + ZIP), no external packages
+  - `exportMeasurements()` — 17-column measurement history
+  - `exportTakeoff()` — Bill of Quantities with summary
+  - `exportCostEstimate()` — cost breakdown with grand total
+- **PDF report generator** — 5 professional templates (Construction, Inspection, Property, Inventory, Material Estimate)
+- **Sensor fusion engine** — weighted multi-sensor fusion with 9 sensor types, circular heading averaging, confidence scoring
+- **Photogrammetry pipeline** — FAST corner detector, NCC patch matching, DLT triangulation, scale calibration, surface area estimation
+- Excel format added to ExportManager (8→9 formats)
+- 16 new tests (226 total)
+
 ### Fixed
-- G1: Added 8 missing capability fields (flash, microphone, GPU, displayResolution, cameraCalibrated, networkType, storageAvailableMb, osVersion).
-- G2: Added thermal throttle guard and low-battery fallback to AlgorithmSelector.
-- G3: Replaced bare in-memory Map storage with serialized JSON round-trip datasource including delete/clearAll.
-- G4: Added degenerate triangle input validation (triangle inequality check).
-- G5: Added timestamp, shapeType, shapeName to MeasurementResult with toJson/fromJson serialization.
-- G6: Added format check, secret scan, dependency audit steps to CI workflow.
-- G7: Removed obsolete `version` key from docker-compose.yml; added app-format service.
-- G8: Added comprehensive edge-case tests (50+ test cases across 13 files).
-- G9: Added all 6 algorithm fallback path tests plus thermal/battery guard tests.
-- G10: Fixed garbled unicode character in LICENSE.
-- G11: Fixed package name typo from meassure_app to geomeasure.
-- G12: Removed unused SensorType import from datasource.
-- G13: Fixed updateUnits to recalculate last measurement instead of being a dead no-op.
+- Excel exporter null-aware operator warnings (fields are non-nullable with defaults)
+- PDF report generator unnecessary null comparisons
+- Photogrammetry curly braces lint warnings
+- Renamed `Point3D` → `PgPoint3D` to avoid collision with sensor fusion types
+
+### Changed
+- Version bumped to 2.2.0+8
+
+## [2.1.0] - 2026-07-26
 
 ### Added
-- E1: MeasurementResult.toJson/fromJson for offline persistence round-trip.
-- E3: CapabilityProfile.toJson for session caching.
-- E4: Shape input validation (validate() method on all SpatialShape subclasses).
-- E5: BuildingShape.calculateTotalWallSurfaceArea() for multi-floor exterior surface area.
-- E8: 13 comprehensive test suites with edge-case and failure-path coverage.
+- **T-Shape room** — composite room shape with main rect + perpendicular wing
+- **U-Shape room** — composite room shape with main rect + two parallel wings
+- **JSON exporter** — export measurements, take-offs, cost estimates as JSON
+- **Vision service** — VisionService interface, VisionServiceFactory, LocalVisionService (pure Dart), MlKitVisionService (scaffold)
+- JSON format added to ExportManager (7→8 formats)
+- 17 new tests (210 total)
 
-## [1.0.0] - 2026-07-26
+### Changed
+- Moved all docs from root to `docs/` folder
+- Comprehensive `.gitignore`
+
+## [2.0.0] - 2026-07-26
+
 ### Added
-- Initial Clean Architecture foundation.
-- Capability Detection Engine with normalized profile.
-- Measurement Engine with dynamic algorithm fallback hierarchy.
-- CAD Exporters (DXF, GeoJSON, CSV).
-- WGS-84 Geodetic land plot calculator.
-- Native Android/iOS platform channel bindings.
-- Docker environment and GitHub Actions CI/CD pipeline.
+- **11 universal 3D shapes**: Cylinder, Sphere, Cuboid, Cone, Frustum, L-Shape, Arch, Gable Roof, Hip Roof, Excavation, Pipe, Pool
+- **7 precision modes**: Fast, Balanced, High Accuracy, Professional Survey, RTK GPS, LiDAR, Manual Verification
+- **13 new measurement fields**: surfaceArea, lateralArea, wallArea, floorArea, ceilingArea, roofArea, footprintArea, excavationVolume, fillVolume, cutVolume, thickness, depth, elevation
+- **AI vision entities**: 50+ ObjectCategory, BoundingBox with IoU, DetectedObject, ObjectCount, SegmentationMask, TextBlock, BarcodeResult, ImageLabel
+- **Object counter**: NMS deduplication, confidence filtering, density estimation, multi-frame averaging
+- **Edge detector**: Sobel edge detection, Harris corner detection, line detection — all pure Dart
+- **Building analysis**: BuildingAnalysis with 20+ metrics, BuildingAnalyzer (FAR, coverage, open area)
+- **Measurement validation**: MeasurementValidation with 5 quality grades, CalibrationStatus, EnvironmentalConditions
+- **Material estimation**: 15 MaterialTypes, MaterialEstimate, QuantityTakeoff, CostEstimate, MaterialEstimator
+- MeasurementResult.fromShape() factory constructor
+
+### Changed
+- Renamed BoxShape → CuboidShape to avoid Flutter name collision
+- Expanded ShapeType enum with 16 new values
+
+## [1.5.0] - 2026-07-26
+
+### Added
+- Production Firebase authentication service
+- Real GPS tracking with Geolocator
+- Camera service with image_picker
+- AR engine interface
+- Cloud sync service
+- Maps service
+- PDF export with `pdf` + `printing`
+
+### Fixed
+- Android build: resolved Theme.Light.NoActionBar resource error
+- compileSdk 35, targetSdk 35, minSdk 24
+- Material3 + AppCompat compatibility
+
+## [1.0.0] - Initial Release
+
+### Added
+- Core measurement engine with 10 shape types
+- Geodetic calculator (Vincenty/Haversine)
+- Unit converter (distance + area)
+- Floor plan canvas visualisation
+- DXF, CSV, GeoJSON, SVG, KML export
+- Capability detection service
+- Hive local storage
+- Dashboard UI with measurement modes

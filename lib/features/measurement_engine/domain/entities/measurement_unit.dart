@@ -3,6 +3,9 @@ enum DistanceUnit {
   feet,
   inches,
   yards,
+  centimeters,
+  kilometers,
+  miles,
 }
 
 enum AreaUnit {
@@ -14,4 +17,18 @@ enum AreaUnit {
   hectares,
   cents,
   guntha,
+  // Regional Indian land units
+  bigha,
+  kanal,
+  marla,
+  // East Asian
+  pyeong,
+  tsubo,
+  // Middle Eastern
+  dunam,
+  // European
+  arpent,
+  // Other
+  squareKilometers,
+  squareMiles,
 }

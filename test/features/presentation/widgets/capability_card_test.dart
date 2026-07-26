@@ -11,9 +11,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: CapabilityCard(profile: profile))),
     );
-    expect(find.text('Hardware Capability Matrix'), findsOneWidget);
-    expect(find.text('LiDAR Sensor'), findsOneWidget);
-    expect(find.text('Memory: 2048 MB'), findsOneWidget);
-    expect(find.text('CPU Cores: 4'), findsOneWidget);
+    // Verify the expansion tile header renders
+    expect(find.text('Hardware Capabilities'), findsOneWidget);
+    // Verify sensor count subtitle
+    expect(find.textContaining('sensors detected'), findsOneWidget);
   });
 }

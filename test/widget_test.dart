@@ -10,6 +10,6 @@ void main() {
   testWidgets('GeoMeasureApp smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const GeoMeasureApp());
     await tester.pumpAndSettle();
-    expect(find.text('GeoMeasure Spatial Engine'), findsOneWidget);
+    expect(find.text('GeoMeasure'), findsOneWidget);
   });
 }

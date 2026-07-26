@@ -1,12 +1,59 @@
-# Device Capabilities Matrix
+# Device Capabilities
 
-## Probed Sensors & Hardware Features
+## Probed Sensors & Hardware
 
-- **Sensors**: LiDAR, ToF Depth, ARCore/ARKit, GPS, Gyroscope, Accelerometer, Magnetometer/Compass, Barometer, UWB, NFC, Bluetooth, Flash, Microphones.
-- **Compute & Platform**: CPU Cores, GPU, AI Accelerator, RAM, OS Version, Battery Level, Thermal State, Network Type, Storage Available.
-- **Camera Specs**: Camera types, display resolution, focal length calibration status.
-- **Permissions**: Location, Camera, Sensor permissions.
+| Sensor | Field | Detection Method |
+|--------|-------|-----------------|
+| LiDAR | `hasLidar` | Platform channel query |
+| ToF Depth | `hasDepthSensor` | Platform channel query |
+| ARCore/ARKit | `hasArCore` | Platform channel query |
+| GPS | `hasGps` | Geolocator availability |
+| Gyroscope | `hasGyroscope` | Platform sensor query |
+| Accelerometer | `hasAccelerometer` | Platform sensor query |
+| Magnetometer | `hasMagnetometer` | Platform sensor query |
+| Barometer | `hasBarometer` | Platform sensor query |
+| Camera | `cameraCount` | Platform channel query |
 
-## Capability Profile Normalization
+## Additional Probed Properties
 
-Returns a normalized `CapabilityProfile` containing sensor availability flags, thermal throttling warnings, and overall system accuracy classification (`high`, `medium`, `low`, `uncalibrated`).
+| Property | Field | Purpose |
+|----------|-------|---------|
+| CPU Cores | `cpuCores` | Compute capability for AI/SLAM |
+| RAM | `ramMb` | Memory budget for spatial mesh |
+| OS Version | `osVersion` | Feature compatibility |
+| Battery Level | `batteryLevel` | Thermal/power management |
+| Thermal State | `thermalState` | Throttling decisions |
+
+## Accuracy Classification
+
+The `CapabilityProfile` assigns an overall accuracy classification:
+
+| Classification | Criteria |
+|---------------|---------|
+| `high` | LiDAR or ToF depth sensor available |
+| `medium` | ARCore/ARKit available |
+| `low` | GPS + IMU only |
+| `basic` | Manual input only |
+
+## Fallback Hierarchy
+
+```mermaid
+graph TD
+    A["LiDAR Available?"] -->|Yes| L["LiDAR Strategy"]
+    A -->|No| B["ToF Depth?"]
+    B -->|Yes| D["Depth Sensor Strategy"]
+    B -->|No| C["ARCore/ARKit?"]
+    C -->|Yes| AR["AR Strategy"]
+    C -->|No| E["Camera + AI?"]
+    E -->|Yes| VS["Visual SLAM"]
+    E -->|No| F["GPS Available?"]
+    F -->|Yes| GPS["GPS + IMU Strategy"]
+    F -->|No| M["Manual Fallback"]
+```
+
+## Implementation
+
+- **Data source**: `HardwareCapabilityDataSourceImpl` in `capability_detection/data/datasources/`
+- **Repository**: `CapabilityRepositoryImpl` wraps data source
+- **Use case**: `DetectCapabilitiesUseCase` returns `CapabilityProfile`
+- **Provider**: `CapabilityProvider` exposes state to UI

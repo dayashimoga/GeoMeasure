@@ -26,8 +26,7 @@ class GeodeticCalculator {
     final dLat = _degreesToRadians(p2.latitude - p1.latitude);
     final dLon = _degreesToRadians(p2.longitude - p1.longitude);
 
-    final a =
-        sin(dLat / 2) * sin(dLat / 2) +
+    final a = sin(dLat / 2) * sin(dLat / 2) +
         cos(_degreesToRadians(p1.latitude)) *
             cos(_degreesToRadians(p2.latitude)) *
             sin(dLon / 2) *

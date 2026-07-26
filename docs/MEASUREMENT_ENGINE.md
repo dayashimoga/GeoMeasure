@@ -1,21 +1,105 @@
-# Measurement Engine Specification
+# Measurement Engine
 
-## Algorithm Hierarchy & Priority
+## Algorithm Hierarchy
 
-1. **LiDAR (`lidar`)**: High-density hardware depth scanning (< 1cm error).
-2. **Depth Sensor / ToF (`depthSensor`)**: Time-of-Flight depth measurement.
-3. **ARCore / ARKit (`arCoreArKit`)**: Visual-Inertial Odometry feature tracking.
-4. **Visual SLAM (`visualSlam`)**: Monocular camera + AI feature matching fallback.
-5. **GPS + IMU (`gpsImu`)**: Geodetic outdoor plot measurement (Haversine / Shoelace).
-6. **Manual Fallback (`manual`)**: User-entered dimension inputs.
+The measurement engine selects the highest-accuracy algorithm available on the device:
 
-## Spatial Entities & Geometry Math
+| Priority | Algorithm | Accuracy | Sensor Required |
+|----------|-----------|----------|----------------|
+| 1 | LiDAR | <1 cm | LiDAR scanner |
+| 2 | Depth Sensor (ToF) | <5 cm | Time-of-Flight sensor |
+| 3 | ARCore/ARKit | ~2-5 cm | AR-capable device |
+| 4 | Visual SLAM | ~5-15 cm | Camera + AI |
+| 5 | GPS + IMU | 1-5 m | GPS + motion sensors |
+| 6 | Manual | User-defined | None |
 
-- **Rooms / Enclosures**: Multi-wall polygon bounding box & volume calculation ($V = \text{Area} \times \text{Height}$).
-- **Walls, Doors, Windows**: Rectangular area subtractions ($\text{Net Area} = \text{Wall Area} - \sum \text{Opening Areas}$).
-- **Plots & Land Areas**: Shoelace formula for irregular polygons ($A = \frac{1}{2} |\sum (x_i y_{i+1} - x_{i+1} y_i)|$).
+Selection is performed by `AlgorithmSelector.selectAlgorithm(CapabilityProfile)`.
 
-## Supported Units
+## Supported Shapes (25)
 
-- **Distance / Length**: Meters ($m$), Feet ($ft$), Inches ($in$), Yards ($yd$).
-- **Area**: Square Meters ($m^2$), Square Feet ($sq\ ft$), Square Inches ($sq\ in$), Square Yards ($sq\ yd$), Acres ($ac$), Hectares ($ha$), Cents ($cent$), Guntha ($guntha$).
+### Room Shapes
+
+| Shape | Parameters | Geometry |
+|-------|-----------|----------|
+| RectangularRoom | width, length, height | V = w × l × h |
+| LShapeRoom | mainW, mainL, wingW, wingL, height | Composite rectangle |
+| TShapeRoom | mainW, mainL, wingW, wingL, height | Main + centred wing |
+| UShapeRoom | mainW, mainL, wingW, wingL, gapW, height | Main + 2 wings + courtyard |
+
+### 3D Primitives
+
+| Shape | Parameters | Volume |
+|-------|-----------|--------|
+| CuboidShape | width, length, height | V = w × l × h |
+| CylinderShape | radius, height | V = π r² h |
+| SphereShape | radius | V = 4/3 π r³ |
+| ConeShape | radius, height | V = 1/3 π r² h |
+| FrustumShape | topR, bottomR, height | V = πh/3(r₁² + r₁r₂ + r₂²) |
+
+### Structures
+
+| Shape | Parameters | Notes |
+|-------|-----------|-------|
+| ArchShape | span, rise, depth | Parabolic arch |
+| GableRoofShape | span, rise, length | Triangular prism |
+| HipRoofShape | width, length, rise | Pyramid-truncated prism |
+
+### Infrastructure
+
+| Shape | Parameters | Notes |
+|-------|-----------|-------|
+| PipeShape | outerR, innerR, length | Hollow cylinder |
+| PoolShape | width, length, depth | + water volume in litres |
+| ExcavationShape | width, length, depth | Cut/fill volumes |
+
+### Land (Geodetic)
+
+| Shape | Parameters | Notes |
+|-------|-----------|-------|
+| PlotShape | List of GPS coordinates | Vincenty/Haversine + Shoelace |
+
+### Basic 2D
+
+RectangleShape, CircleShape, TriangleShape, TrapezoidShape, EllipseShape, PolygonShape.
+
+## Units
+
+### Distance
+
+| Unit | Label |
+|------|-------|
+| Meters | m |
+| Feet | ft |
+| Inches | in |
+| Centimetres | cm |
+| Millimetres | mm |
+| Yards | yd |
+| Kilometres | km |
+| Miles | mi |
+
+### Area
+
+| Unit | Label | Conversion (from m²) |
+|------|-------|----------------------|
+| Square Metres | m² | 1 |
+| Square Feet | sq ft | 10.7639 |
+| Acres | ac | 0.000247105 |
+| Hectares | ha | 0.0001 |
+| Cents | cent | 0.024711 |
+| Guntha | guntha | 0.000988 |
+
+## Precision Modes
+
+| Mode | Description |
+|------|-------------|
+| Fast | Quick estimate, lower accuracy |
+| Balanced | Default trade-off |
+| High Accuracy | Extended sensor sampling |
+| Professional Survey | Survey-grade calibration |
+| RTK GPS | Real-Time Kinematic correction |
+| LiDAR | Hardware depth scanning |
+| Manual Verification | User validates each measurement |
+
+## Sensor Fusion
+
+9 sensor types fused with weighted averaging. See [IMPLEMENTATION.md](IMPLEMENTATION.md#sensor-fusion-domainservicessensor_fusiondart) for weights and algorithm details.

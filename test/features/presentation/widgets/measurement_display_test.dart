@@ -24,10 +24,13 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: MeasurementDisplay(result: result))),
     );
-    expect(
-      find.text('Selected Technique: ARCore / ARKit Visual-Inertial'),
-      findsOneWidget,
-    );
-    expect(find.text('Estimated Accuracy: 95.0%'), findsOneWidget);
+    // Verify algorithm name renders
+    expect(find.text('ARCore / ARKit Visual-Inertial'), findsOneWidget);
+    // Verify accuracy badge
+    expect(find.text('95% accuracy'), findsOneWidget);
+    // Verify metric values
+    expect(find.text('Area'), findsOneWidget);
+    expect(find.text('Perimeter'), findsOneWidget);
+    expect(find.text('Volume'), findsOneWidget);
   });
 }

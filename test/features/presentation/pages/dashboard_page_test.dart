@@ -19,10 +19,13 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Hardware Capability Matrix'), findsOneWidget);
+    // Verify tab bar and mode selector
+    expect(find.text('Measure'), findsOneWidget);
+    expect(find.text('Projects'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Room'), findsOneWidget);
     expect(find.text('Wall'), findsOneWidget);
-    expect(find.text('Plot / Land'), findsOneWidget);
+    expect(find.text('Land'), findsOneWidget);
 
     final executeButton = find.byKey(const Key('execute_measurement_button'));
     expect(executeButton, findsOneWidget);
@@ -30,7 +33,8 @@ void main() {
     await tester.tap(executeButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('Export DXF'), findsOneWidget);
-    expect(find.text('Export CSV'), findsOneWidget);
+    // After measurement, export chips should appear
+    expect(find.text('DXF'), findsOneWidget);
+    expect(find.text('CSV'), findsOneWidget);
   });
 }
