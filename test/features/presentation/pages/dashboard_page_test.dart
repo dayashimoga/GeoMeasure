@@ -11,6 +11,11 @@ void main() {
   testWidgets('DashboardPage renders mode tabs and execute button', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
     await tester.pumpAndSettle();
 
@@ -19,20 +24,13 @@ void main() {
     expect(find.text('Wall'), findsOneWidget);
     expect(find.text('Plot / Land'), findsOneWidget);
 
-    final executeBtn = find.widgetWithText(
-      ElevatedButton,
-      'Measure Room Enclosure',
-    );
-    expect(executeBtn, findsOneWidget);
+    final measureBtnText = find.text('Measure Room Enclosure');
+    expect(measureBtnText, findsOneWidget);
 
-    await tester.ensureVisible(executeBtn);
-    await tester.pumpAndSettle();
-    await tester.tap(executeBtn, warnIfMissed: false);
+    await tester.tap(measureBtnText);
     await tester.pumpAndSettle();
 
-    final exportDxf = find.text('Export DXF');
-    expect(exportDxf, findsOneWidget);
-    final exportCsv = find.text('Export CSV');
-    expect(exportCsv, findsOneWidget);
+    expect(find.text('Export DXF'), findsOneWidget);
+    expect(find.text('Export CSV'), findsOneWidget);
   });
 }
