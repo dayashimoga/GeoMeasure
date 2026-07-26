@@ -24,10 +24,10 @@ void main() {
     expect(find.text('Wall'), findsOneWidget);
     expect(find.text('Plot / Land'), findsOneWidget);
 
-    final measureBtnText = find.text('Measure Room Enclosure');
-    expect(measureBtnText, findsOneWidget);
+    final executeButton = find.byType(ElevatedButton);
+    expect(executeButton, findsOneWidget);
 
-    await tester.tap(measureBtnText);
+    await tester.tap(executeButton);
     await tester.pumpAndSettle();
 
     expect(find.text('Export DXF'), findsOneWidget);

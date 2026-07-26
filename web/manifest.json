@@ -1,0 +1,11 @@
+{
+    "name": "GeoMeasure Spatial Engine",
+    "short_name": "GeoMeasure",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "GeoMeasure - Capability-Aware Spatial & Land Measurement Engine",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false
+}
