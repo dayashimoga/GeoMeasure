@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app-test:
+    build: .
+    command: flutter test
+    volumes:
+      - .:/app
+
+  app-analyze:
+    build: .
+    command: flutter analyze
+    volumes:
+      - .:/app
+
+  app-build:
+    build: .
+    command: flutter build apk --debug
+    volumes:
+      - .:/app

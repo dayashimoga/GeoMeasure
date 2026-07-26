@@ -1,0 +1,223 @@
+import 'dart:math';
+import '../services/geodetic_calculator.dart';
+
+class Point3D {
+  final double x;
+  final double y;
+  final double z;
+
+  const Point3D(this.x, this.y, [this.z = 0.0]);
+
+  double distanceTo(Point3D other) {
+    final dx = x - other.x;
+    final dy = y - other.y;
+    final dz = z - other.z;
+    return sqrt(dx * dx + dy * dy + dz * dz);
+  }
+}
+
+enum ShapeType {
+  rectangle,
+  triangle,
+  circle,
+  polygon,
+  room,
+  wall,
+  opening,
+  plot,
+  building,
+}
+
+abstract class SpatialShape {
+  final ShapeType type;
+  const SpatialShape(this.type);
+
+  double calculateAreaInSquareMeters();
+  double calculatePerimeterInMeters();
+  double calculateVolumeInCubicMeters() => 0.0;
+}
+
+class RectangleShape extends SpatialShape {
+  final double lengthMeters;
+  final double widthMeters;
+
+  const RectangleShape({required this.lengthMeters, required this.widthMeters})
+      : super(ShapeType.rectangle);
+
+  @override
+  double calculateAreaInSquareMeters() => lengthMeters * widthMeters;
+
+  @override
+  double calculatePerimeterInMeters() => 2 * (lengthMeters + widthMeters);
+}
+
+class CircleShape extends SpatialShape {
+  final double radiusMeters;
+
+  const CircleShape({required this.radiusMeters}) : super(ShapeType.circle);
+
+  @override
+  double calculateAreaInSquareMeters() => pi * radiusMeters * radiusMeters;
+
+  @override
+  double calculatePerimeterInMeters() => 2 * pi * radiusMeters;
+}
+
+class TriangleShape extends SpatialShape {
+  final double sideA;
+  final double sideB;
+  final double sideC;
+
+  const TriangleShape({
+    required this.sideA,
+    required this.sideB,
+    required this.sideC,
+  }) : super(ShapeType.triangle);
+
+  @override
+  double calculateAreaInSquareMeters() {
+    final s = (sideA + sideB + sideC) / 2.0;
+    final areaSq = s * (s - sideA) * (s - sideB) * (s - sideC);
+    return areaSq > 0 ? sqrt(areaSq) : 0.0;
+  }
+
+  @override
+  double calculatePerimeterInMeters() => sideA + sideB + sideC;
+}
+
+class IrregularPolygonShape extends SpatialShape {
+  final List<Point3D> vertices;
+
+  const IrregularPolygonShape({required this.vertices})
+      : super(ShapeType.polygon);
+
+  @override
+  double calculateAreaInSquareMeters() {
+    if (vertices.length < 3) return 0.0;
+    double areaSum = 0.0;
+    for (int i = 0; i < vertices.length; i++) {
+      final j = (i + 1) % vertices.length;
+      areaSum += vertices[i].x * vertices[j].y;
+      areaSum -= vertices[j].x * vertices[i].y;
+    }
+    return (areaSum.abs()) / 2.0;
+  }
+
+  @override
+  double calculatePerimeterInMeters() {
+    if (vertices.length < 2) return 0.0;
+    double perimeter = 0.0;
+    for (int i = 0; i < vertices.length; i++) {
+      final j = (i + 1) % vertices.length;
+      perimeter += vertices[i].distanceTo(vertices[j]);
+    }
+    return perimeter;
+  }
+}
+
+class WallOpening {
+  final String label; // e.g. "Main Door", "Window 1"
+  final double widthMeters;
+  final double heightMeters;
+
+  const WallOpening({
+    required this.label,
+    required this.widthMeters,
+    required this.heightMeters,
+  });
+
+  double get areaInSquareMeters => widthMeters * heightMeters;
+}
+
+class WallShape extends SpatialShape {
+  final double lengthMeters;
+  final double heightMeters;
+  final List<WallOpening> openings;
+
+  const WallShape({
+    required this.lengthMeters,
+    required this.heightMeters,
+    this.openings = const [],
+  }) : super(ShapeType.wall);
+
+  double get grossAreaInSquareMeters => lengthMeters * heightMeters;
+
+  double get openingsTotalAreaInSquareMeters {
+    return openings.fold(0.0, (sum, op) => sum + op.areaInSquareMeters);
+  }
+
+  @override
+  double calculateAreaInSquareMeters() {
+    final netArea = grossAreaInSquareMeters - openingsTotalAreaInSquareMeters;
+    return netArea > 0 ? netArea : 0.0;
+  }
+
+  @override
+  double calculatePerimeterInMeters() => 2 * (lengthMeters + heightMeters);
+}
+
+class RoomShape extends IrregularPolygonShape {
+  final double heightMeters;
+
+  const RoomShape({
+    required super.vertices,
+    required this.heightMeters,
+  });
+
+  @override
+  double calculateVolumeInCubicMeters() {
+    return calculateAreaInSquareMeters() * heightMeters;
+  }
+}
+
+class PlotShape extends SpatialShape {
+  final List<GpsCoordinate> coordinates;
+
+  const PlotShape({required this.coordinates}) : super(ShapeType.plot);
+
+  @override
+  double calculateAreaInSquareMeters() {
+    return GeodeticCalculator.calculatePolygonAreaGeodetic(coordinates);
+  }
+
+  @override
+  double calculatePerimeterInMeters() {
+    if (coordinates.length < 2) return 0.0;
+    double perimeter = 0.0;
+    for (int i = 0; i < coordinates.length; i++) {
+      final next = (i + 1) % coordinates.length;
+      perimeter += GeodeticCalculator.calculateDistanceHaversine(
+        coordinates[i],
+        coordinates[next],
+      );
+    }
+    return perimeter;
+  }
+}
+
+class BuildingShape extends SpatialShape {
+  final SpatialShape baseFootprint;
+  final int numberOfFloors;
+  final double floorHeightMeters;
+
+  const BuildingShape({
+    required this.baseFootprint,
+    required this.numberOfFloors,
+    required this.floorHeightMeters,
+  }) : super(ShapeType.building);
+
+  @override
+  double calculateAreaInSquareMeters() {
+    return baseFootprint.calculateAreaInSquareMeters() * numberOfFloors;
+  }
+
+  @override
+  double calculatePerimeterInMeters() {
+    return baseFootprint.calculatePerimeterInMeters();
+  }
+
+  @override
+  double calculateVolumeInCubicMeters() {
+    return baseFootprint.calculateAreaInSquareMeters() * numberOfFloors * floorHeightMeters;
+  }
+}
