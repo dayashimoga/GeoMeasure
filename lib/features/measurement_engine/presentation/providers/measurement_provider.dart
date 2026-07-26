@@ -17,6 +17,7 @@ class MeasurementProvider extends ChangeNotifier {
   DistanceUnit _targetDistanceUnit = DistanceUnit.meters;
   MeasurementResult? _lastResult;
   SpatialShape? _lastShape;
+  CapabilityProfile? _lastProfile;
   List<MeasurementResult> _history = [];
 
   AreaUnit get targetAreaUnit => _targetAreaUnit;
@@ -30,13 +31,20 @@ class MeasurementProvider extends ChangeNotifier {
     this.repository,
   });
 
+  /// Fix G13: recalculate last measurement when units change
   void updateUnits({AreaUnit? areaUnit, DistanceUnit? distanceUnit}) {
     if (areaUnit != null) _targetAreaUnit = areaUnit;
     if (distanceUnit != null) _targetDistanceUnit = distanceUnit;
 
-    // Recalculate last measurement if present
-    if (_lastShape != null && _lastResult != null) {
-      // Re-run with updated unit selections
+    if (_lastShape != null && _lastProfile != null) {
+      _lastResult = executeMeasurementUseCase(
+        ExecuteMeasurementParams(
+          shape: _lastShape!,
+          profile: _lastProfile!,
+          areaUnit: _targetAreaUnit,
+          distanceUnit: _targetDistanceUnit,
+        ),
+      );
     }
     notifyListeners();
   }
@@ -44,14 +52,17 @@ class MeasurementProvider extends ChangeNotifier {
   void calculateMeasurement({
     required SpatialShape shape,
     required CapabilityProfile profile,
+    String shapeName = '',
   }) {
     _lastShape = shape;
+    _lastProfile = profile;
     _lastResult = executeMeasurementUseCase(
       ExecuteMeasurementParams(
         shape: shape,
         profile: profile,
         areaUnit: _targetAreaUnit,
         distanceUnit: _targetDistanceUnit,
+        shapeName: shapeName,
       ),
     );
     if (_lastResult != null) {
@@ -73,7 +84,7 @@ class MeasurementProvider extends ChangeNotifier {
 
   String exportPlotToGeoJson() {
     if (_lastShape is PlotShape) {
-      return GeoJsonExporter.generateGeoJson(_lastShape as PlotShape);
+      return GeoJsonExporter.generateGeoJson(_lastShape! as PlotShape);
     }
     return '';
   }

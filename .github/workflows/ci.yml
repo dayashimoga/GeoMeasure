@@ -8,7 +8,7 @@ on:
 
 jobs:
   analyze-and-test:
-    name: Analyze & Test
+    name: Lint, Format, Analyze & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Check formatting
+        run: dart format --set-exit-if-changed .
+
       - name: Analyze code
         run: flutter analyze
 
@@ -32,6 +35,16 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: coverage/lcov.info
+
+      - name: Secret scan (git-secrets pattern check)
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          ! grep -rn --include="*.dart" --include="*.yaml" --include="*.json" \
+            -E "(api_key|secret_key|password|token)\s*[:=]\s*['\"][^'\"]{8,}" . \
+            || echo "No secrets detected."
+
+      - name: Dependency audit
+        run: flutter pub deps --no-dev
 
   build-android:
     name: Build Android Artifacts

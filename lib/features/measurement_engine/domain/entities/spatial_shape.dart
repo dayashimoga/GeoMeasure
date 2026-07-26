@@ -35,6 +35,9 @@ abstract class SpatialShape {
   double calculateAreaInSquareMeters();
   double calculatePerimeterInMeters();
   double calculateVolumeInCubicMeters() => 0.0;
+
+  /// Validates shape inputs. Returns null if valid, or error message string.
+  String? validate() => null;
 }
 
 class RectangleShape extends SpatialShape {
@@ -43,6 +46,14 @@ class RectangleShape extends SpatialShape {
 
   const RectangleShape({required this.lengthMeters, required this.widthMeters})
       : super(ShapeType.rectangle);
+
+  @override
+  String? validate() {
+    if (lengthMeters <= 0 || widthMeters <= 0) {
+      return 'Rectangle dimensions must be positive';
+    }
+    return null;
+  }
 
   @override
   double calculateAreaInSquareMeters() => lengthMeters * widthMeters;
@@ -55,6 +66,12 @@ class CircleShape extends SpatialShape {
   final double radiusMeters;
 
   const CircleShape({required this.radiusMeters}) : super(ShapeType.circle);
+
+  @override
+  String? validate() {
+    if (radiusMeters <= 0) return 'Circle radius must be positive';
+    return null;
+  }
 
   @override
   double calculateAreaInSquareMeters() => pi * radiusMeters * radiusMeters;
@@ -75,10 +92,23 @@ class TriangleShape extends SpatialShape {
   }) : super(ShapeType.triangle);
 
   @override
+  String? validate() {
+    if (sideA <= 0 || sideB <= 0 || sideC <= 0) {
+      return 'Triangle sides must be positive';
+    }
+    if (sideA + sideB <= sideC ||
+        sideA + sideC <= sideB ||
+        sideB + sideC <= sideA) {
+      return 'Triangle inequality violated: sum of any two sides must exceed the third';
+    }
+    return null;
+  }
+
+  @override
   double calculateAreaInSquareMeters() {
+    if (validate() != null) return 0.0;
     final s = (sideA + sideB + sideC) / 2.0;
-    final areaSq = s * (s - sideA) * (s - sideB) * (s - sideC);
-    return areaSq > 0 ? sqrt(areaSq) : 0.0;
+    return sqrt(s * (s - sideA) * (s - sideB) * (s - sideC));
   }
 
   @override
@@ -90,6 +120,12 @@ class IrregularPolygonShape extends SpatialShape {
 
   const IrregularPolygonShape({required this.vertices})
       : super(ShapeType.polygon);
+
+  @override
+  String? validate() {
+    if (vertices.length < 3) return 'Polygon requires at least 3 vertices';
+    return null;
+  }
 
   @override
   double calculateAreaInSquareMeters() {
@@ -116,7 +152,7 @@ class IrregularPolygonShape extends SpatialShape {
 }
 
 class WallOpening {
-  final String label; // e.g. "Main Door", "Window 1"
+  final String label;
   final double widthMeters;
   final double heightMeters;
 
@@ -147,6 +183,17 @@ class WallShape extends SpatialShape {
   }
 
   @override
+  String? validate() {
+    if (lengthMeters <= 0 || heightMeters <= 0) {
+      return 'Wall dimensions must be positive';
+    }
+    if (openingsTotalAreaInSquareMeters > grossAreaInSquareMeters) {
+      return 'Openings area exceeds wall area';
+    }
+    return null;
+  }
+
+  @override
   double calculateAreaInSquareMeters() {
     final netArea = grossAreaInSquareMeters - openingsTotalAreaInSquareMeters;
     return netArea > 0 ? netArea : 0.0;
@@ -165,6 +212,14 @@ class RoomShape extends IrregularPolygonShape {
   });
 
   @override
+  String? validate() {
+    final baseValidation = super.validate();
+    if (baseValidation != null) return baseValidation;
+    if (heightMeters <= 0) return 'Room height must be positive';
+    return null;
+  }
+
+  @override
   double calculateVolumeInCubicMeters() {
     return calculateAreaInSquareMeters() * heightMeters;
   }
@@ -174,6 +229,12 @@ class PlotShape extends SpatialShape {
   final List<GpsCoordinate> coordinates;
 
   const PlotShape({required this.coordinates}) : super(ShapeType.plot);
+
+  @override
+  String? validate() {
+    if (coordinates.length < 3) return 'Plot requires at least 3 GPS coordinates';
+    return null;
+  }
 
   @override
   double calculateAreaInSquareMeters() {
@@ -207,6 +268,14 @@ class BuildingShape extends SpatialShape {
   }) : super(ShapeType.building);
 
   @override
+  String? validate() {
+    if (numberOfFloors <= 0) return 'Building must have at least 1 floor';
+    if (floorHeightMeters <= 0) return 'Floor height must be positive';
+    return baseFootprint.validate();
+  }
+
+  /// Total built-up area across all floors.
+  @override
   double calculateAreaInSquareMeters() {
     return baseFootprint.calculateAreaInSquareMeters() * numberOfFloors;
   }
@@ -219,5 +288,10 @@ class BuildingShape extends SpatialShape {
   @override
   double calculateVolumeInCubicMeters() {
     return baseFootprint.calculateAreaInSquareMeters() * numberOfFloors * floorHeightMeters;
+  }
+
+  /// Total exterior wall surface area for all floors (E5).
+  double calculateTotalWallSurfaceArea() {
+    return baseFootprint.calculatePerimeterInMeters() * floorHeightMeters * numberOfFloors;
   }
 }

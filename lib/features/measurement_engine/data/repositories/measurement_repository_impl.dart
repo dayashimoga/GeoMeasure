@@ -16,4 +16,14 @@ class MeasurementRepositoryImpl implements MeasurementRepository {
   Future<List<MeasurementResult>> getSavedMeasurementResults() async {
     return await dataSource.getAllSavedMeasurements();
   }
+
+  @override
+  Future<void> deleteMeasurementResult(String id) async {
+    await dataSource.deleteMeasurement(id);
+  }
+
+  @override
+  Future<void> clearAllResults() async {
+    await dataSource.clearAll();
+  }
 }

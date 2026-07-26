@@ -23,12 +23,20 @@ class PlatformChannelService {
           hasBluetooth: result['hasBluetooth'] as bool? ?? true,
           hasNfc: result['hasNfc'] as bool? ?? false,
           hasUwb: result['hasUwb'] as bool? ?? false,
+          hasFlash: result['hasFlash'] as bool? ?? true,
+          hasMicrophone: result['hasMicrophone'] as bool? ?? true,
+          hasGpu: result['hasGpu'] as bool? ?? true,
+          hasAiAccelerator: result['hasAiAccelerator'] as bool? ?? true,
+          cameraCalibrated: result['cameraCalibrated'] as bool? ?? false,
           ramMb: result['ramMb'] as int? ?? 4096,
           cpuCores: result['cpuCores'] as int? ?? 8,
-          hasAiAccelerator: result['hasAiAccelerator'] as bool? ?? true,
+          storageAvailableMb: result['storageAvailableMb'] as int? ?? 2048,
+          displayResolution: result['displayResolution'] as String? ?? '1080x1920',
+          osVersion: result['osVersion'] as String? ?? 'unknown',
           batteryLevel: (result['batteryLevel'] as num?)?.toDouble() ?? 1.0,
           thermalState: _parseThermalState(result['thermalState'] as String?),
           sensorAccuracy: _parseAccuracy(result['sensorAccuracy'] as String?),
+          networkType: _parseNetworkType(result['networkType'] as String?),
           permissionsGranted: result['permissionsGranted'] as bool? ?? true,
         );
       }
@@ -64,6 +72,17 @@ class PlatformChannelService {
         return HardwareAccuracy.low;
       default:
         return HardwareAccuracy.uncalibrated;
+    }
+  }
+
+  NetworkType _parseNetworkType(String? value) {
+    switch (value) {
+      case 'wifi':
+        return NetworkType.wifi;
+      case 'cellular':
+        return NetworkType.cellular;
+      default:
+        return NetworkType.none;
     }
   }
 }

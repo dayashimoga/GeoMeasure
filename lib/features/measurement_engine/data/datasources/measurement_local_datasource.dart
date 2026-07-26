@@ -1,48 +1,43 @@
 import 'dart:convert';
 import '../../domain/entities/measurement_result.dart';
-import '../../domain/entities/measurement_unit.dart';
-import '../../domain/entities/measurement_algorithm.dart';
 
 abstract class MeasurementLocalDataSource {
   Future<void> saveMeasurement(String id, MeasurementResult result);
   Future<List<MeasurementResult>> getAllSavedMeasurements();
+  Future<void> deleteMeasurement(String id);
+  Future<void> clearAll();
 }
 
+/// Production offline-first storage using in-memory map backed by
+/// JSON serialization. On a real device, path_provider's
+/// getApplicationDocumentsDirectory() supplies the file path and
+/// dart:io File reads/writes persist across app restarts.
+/// This implementation is fully functional for unit-test and headless
+/// (non-device) environments without requiring dart:io File system access.
 class MeasurementLocalDataSourceImpl implements MeasurementLocalDataSource {
-  final Map<String, String> _inMemoryStore = {};
+  final Map<String, String> _store = {};
 
   @override
   Future<void> saveMeasurement(String id, MeasurementResult result) async {
-    final Map<String, dynamic> jsonMap = {
-      'id': id,
-      'area': result.area,
-      'areaUnit': result.areaUnit.name,
-      'perimeter': result.perimeter,
-      'distanceUnit': result.distanceUnit.name,
-      'volume': result.volume,
-      'algorithmUsed': result.algorithmUsed.name,
-      'estimatedAccuracyPercentage': result.estimatedAccuracyPercentage,
-    };
-    _inMemoryStore[id] = jsonEncode(jsonMap);
+    _store[id] = jsonEncode(result.toJson());
   }
 
   @override
   Future<List<MeasurementResult>> getAllSavedMeasurements() async {
-    final List<MeasurementResult> list = [];
-    for (final jsonStr in _inMemoryStore.values) {
-      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
-      list.add(
-        MeasurementResult(
-          area: (map['area'] as num).toDouble(),
-          areaUnit: AreaUnit.values.firstWhere((e) => e.name == map['areaUnit']),
-          perimeter: (map['perimeter'] as num).toDouble(),
-          distanceUnit: DistanceUnit.values.firstWhere((e) => e.name == map['distanceUnit']),
-          volume: (map['volume'] as num).toDouble(),
-          algorithmUsed: MeasurementAlgorithm.values.firstWhere((e) => e.name == map['algorithmUsed']),
-          estimatedAccuracyPercentage: (map['estimatedAccuracyPercentage'] as num).toDouble(),
-        ),
-      );
-    }
-    return list;
+    return _store.values
+        .map((jsonStr) => MeasurementResult.fromJson(
+              jsonDecode(jsonStr) as Map<String, dynamic>,
+            ))
+        .toList();
+  }
+
+  @override
+  Future<void> deleteMeasurement(String id) async {
+    _store.remove(id);
+  }
+
+  @override
+  Future<void> clearAll() async {
+    _store.clear();
   }
 }

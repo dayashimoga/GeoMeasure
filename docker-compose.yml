@@ -1,15 +1,19 @@
-version: '3.8'
-
 services:
   app-test:
     build: .
-    command: flutter test
+    command: flutter test --coverage
     volumes:
       - .:/app
 
   app-analyze:
     build: .
     command: flutter analyze
+    volumes:
+      - .:/app
+
+  app-format:
+    build: .
+    command: dart format --set-exit-if-changed .
     volumes:
       - .:/app
 

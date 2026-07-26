@@ -12,6 +12,9 @@ enum SensorType {
   bluetooth,
   nfc,
   uwb,
+  flash,
+  microphone,
+  gpu,
 }
 
 enum HardwareAccuracy {
@@ -26,4 +29,10 @@ enum ThermalState {
   fair,
   serious,
   critical,
+}
+
+enum NetworkType {
+  wifi,
+  cellular,
+  none,
 }

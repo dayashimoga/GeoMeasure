@@ -11,17 +11,35 @@ class ExecuteMeasurementParams {
   final CapabilityProfile profile;
   final DistanceUnit distanceUnit;
   final AreaUnit areaUnit;
+  final String shapeName;
 
   const ExecuteMeasurementParams({
     required this.shape,
     required this.profile,
     this.distanceUnit = DistanceUnit.meters,
     this.areaUnit = AreaUnit.squareMeters,
+    this.shapeName = '',
   });
 }
 
 class ExecuteMeasurementUseCase {
   MeasurementResult call(ExecuteMeasurementParams params) {
+    // E4: Validate shape inputs
+    final validationError = params.shape.validate();
+    if (validationError != null) {
+      return MeasurementResult(
+        area: 0,
+        areaUnit: params.areaUnit,
+        perimeter: 0,
+        distanceUnit: params.distanceUnit,
+        volume: 0,
+        algorithmUsed: MeasurementAlgorithm.manual,
+        estimatedAccuracyPercentage: 0,
+        shapeType: params.shape.type,
+        shapeName: 'INVALID: $validationError',
+      );
+    }
+
     final algorithm = AlgorithmSelector.selectOptimalAlgorithm(params.profile);
 
     final rawAreaSqMeters = params.shape.calculateAreaInSquareMeters();
@@ -38,7 +56,7 @@ class ExecuteMeasurementUseCase {
       targetUnit: params.distanceUnit,
     );
 
-    double accuracy = 99.0;
+    double accuracy;
     switch (algorithm) {
       case MeasurementAlgorithm.lidar:
         accuracy = 99.5;
@@ -68,6 +86,8 @@ class ExecuteMeasurementUseCase {
       volume: rawVolumeCubicMeters,
       algorithmUsed: algorithm,
       estimatedAccuracyPercentage: accuracy,
+      shapeType: params.shape.type,
+      shapeName: params.shapeName,
     );
   }
 }
