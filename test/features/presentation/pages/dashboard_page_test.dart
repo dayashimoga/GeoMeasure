@@ -12,6 +12,8 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.pumpAndSettle();
 
     expect(find.text('Hardware Capability Matrix'), findsOneWidget);

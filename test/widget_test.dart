@@ -9,6 +9,8 @@ void main() {
 
   testWidgets('GeoMeasureApp smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const GeoMeasureApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.pumpAndSettle();
     expect(find.text('GeoMeasure Spatial Engine'), findsOneWidget);
   });

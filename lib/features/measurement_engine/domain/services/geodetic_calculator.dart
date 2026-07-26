@@ -19,11 +19,15 @@ class GeodeticCalculator {
   static const double polarRadiusB = 6356752.314245;
 
   /// Calculates geodesic distance between two points using Haversine formula (accurate for short/medium distances)
-  static double calculateDistanceHaversine(GpsCoordinate p1, GpsCoordinate p2) {
+  static double calculateDistanceHaversine(
+    GpsCoordinate p1,
+    GpsCoordinate p2,
+  ) {
     final dLat = _degreesToRadians(p2.latitude - p1.latitude);
     final dLon = _degreesToRadians(p2.longitude - p1.longitude);
 
-    final a = sin(dLat / 2) * sin(dLat / 2) +
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(_degreesToRadians(p1.latitude)) *
             cos(_degreesToRadians(p2.latitude)) *
             sin(dLon / 2) *
@@ -33,27 +37,43 @@ class GeodeticCalculator {
     return equatorialRadiusA * c;
   }
 
-  /// Calculates surface area of a GPS boundary polygon on WGS-84 ellipsoid in square meters
+  /// Calculates surface area of a GPS boundary polygon projected onto mean-latitude tangent plane in square meters
   static double calculatePolygonAreaGeodetic(List<GpsCoordinate> polygon) {
     if (polygon.length < 3) return 0.0;
 
-    double totalArea = 0.0;
     final int count = polygon.length;
+    double meanLat = 0.0;
+    double meanLon = 0.0;
 
-    for (int i = 0; i < count; i++) {
-      final p1 = polygon[i];
-      final p2 = polygon[(i + 1) % count];
+    for (final pt in polygon) {
+      meanLat += pt.latitude;
+      meanLon += pt.longitude;
+    }
+    meanLat /= count;
+    meanLon /= count;
 
-      final lat1Rad = _degreesToRadians(p1.latitude);
-      final lat2Rad = _degreesToRadians(p2.latitude);
-      final lon1Rad = _degreesToRadians(p1.longitude);
-      final lon2Rad = _degreesToRadians(p2.longitude);
+    final lat0Rad = _degreesToRadians(meanLat);
+    final lon0Rad = _degreesToRadians(meanLon);
+    final cosLat0 = cos(lat0Rad);
 
-      totalArea += (lon2Rad - lon1Rad) * (2 + sin(lat1Rad) + sin(lat2Rad));
+    final List<Point> projectedPoints = [];
+    for (final pt in polygon) {
+      final latRad = _degreesToRadians(pt.latitude);
+      final lonRad = _degreesToRadians(pt.longitude);
+
+      final x = equatorialRadiusA * (lonRad - lon0Rad) * cosLat0;
+      final y = equatorialRadiusA * (latRad - lat0Rad);
+      projectedPoints.add(Point(x, y));
     }
 
-    totalArea = (totalArea * equatorialRadiusA * equatorialRadiusA / 4.0).abs();
-    return totalArea;
+    double areaSum = 0.0;
+    for (int i = 0; i < count; i++) {
+      final j = (i + 1) % count;
+      areaSum += projectedPoints[i].x * projectedPoints[j].y;
+      areaSum -= projectedPoints[j].x * projectedPoints[i].y;
+    }
+
+    return (areaSum.abs()) / 2.0;
   }
 
   static double _degreesToRadians(double degrees) {
