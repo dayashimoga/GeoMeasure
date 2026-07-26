@@ -6,10 +6,10 @@ import '../../domain/usecases/detect_capabilities_usecase.dart';
 class CapabilityProvider extends ChangeNotifier {
   final DetectCapabilitiesUseCase detectCapabilitiesUseCase;
 
-  CapabilityProfile? _profile;
+  CapabilityProfile _profile = CapabilityProfile.fallbackManual();
   bool _isLoading = false;
 
-  CapabilityProfile? get profile => _profile;
+  CapabilityProfile get profile => _profile;
   bool get isLoading => _isLoading;
 
   CapabilityProvider({required this.detectCapabilitiesUseCase});

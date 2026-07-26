@@ -40,9 +40,6 @@ class _DashboardPageState extends State<DashboardPage> {
         listenable: sl.capabilityProvider,
         builder: (context, _) {
           final profile = sl.capabilityProvider.profile;
-          if (sl.capabilityProvider.isLoading || profile == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
 
           return SingleChildScrollView(
             child: Column(
