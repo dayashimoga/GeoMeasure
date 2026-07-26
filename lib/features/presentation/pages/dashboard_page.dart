@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/di/service_locator.dart';
+import '../../capability_detection/domain/entities/capability_profile.dart';
 import '../../measurement_engine/domain/entities/measurement_unit.dart';
 import '../../measurement_engine/domain/entities/spatial_shape.dart';
 import '../../measurement_engine/domain/services/geodetic_calculator.dart';
@@ -32,7 +33,7 @@ class _DashboardPageState extends State<DashboardPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => sl.capabilityProvider.loadCapabilities(),
-          )
+          ),
         ],
       ),
       body: ListenableBuilder(
@@ -84,7 +85,10 @@ class _DashboardPageState extends State<DashboardPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Area Unit', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Area Unit',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 DropdownButton<AreaUnit>(
                   value: sl.measurementProvider.targetAreaUnit,
                   items: AreaUnit.values.map((unit) {
@@ -106,7 +110,10 @@ class _DashboardPageState extends State<DashboardPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Distance Unit', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Distance Unit',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 DropdownButton<DistanceUnit>(
                   value: sl.measurementProvider.targetDistanceUnit,
                   items: DistanceUnit.values.map((unit) {
@@ -131,7 +138,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildModeSelector(profile) {
+  Widget _buildModeSelector(CapabilityProfile profile) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
@@ -140,9 +147,21 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             SegmentedButton<int>(
               segments: const [
-                ButtonSegment(value: 0, label: Text('Room'), icon: Icon(Icons.meeting_room)),
-                ButtonSegment(value: 1, label: Text('Wall'), icon: Icon(Icons.sensor_window)),
-                ButtonSegment(value: 2, label: Text('Plot / Land'), icon: Icon(Icons.map)),
+                ButtonSegment(
+                  value: 0,
+                  label: Text('Room'),
+                  icon: Icon(Icons.meeting_room),
+                ),
+                ButtonSegment(
+                  value: 1,
+                  label: Text('Wall'),
+                  icon: Icon(Icons.sensor_window),
+                ),
+                ButtonSegment(
+                  value: 2,
+                  label: Text('Plot / Land'),
+                  icon: Icon(Icons.map),
+                ),
               ],
               selected: {_selectedModeIndex},
               onSelectionChanged: (set) {
@@ -170,8 +189,16 @@ class _DashboardPageState extends State<DashboardPage> {
                     lengthMeters: 6.0,
                     heightMeters: 3.0,
                     openings: [
-                      WallOpening(label: 'Door 1', widthMeters: 0.9, heightMeters: 2.1),
-                      WallOpening(label: 'Window 1', widthMeters: 1.2, heightMeters: 1.2),
+                      WallOpening(
+                        label: 'Door 1',
+                        widthMeters: 0.9,
+                        heightMeters: 2.1,
+                      ),
+                      WallOpening(
+                        label: 'Window 1',
+                        widthMeters: 1.2,
+                        heightMeters: 1.2,
+                      ),
                     ],
                   );
                 } else {
@@ -184,7 +211,10 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   );
                 }
-                sl.measurementProvider.calculateMeasurement(shape: shape, profile: profile);
+                sl.measurementProvider.calculateMeasurement(
+                  shape: shape,
+                  profile: profile,
+                );
               },
               icon: const Icon(Icons.play_arrow),
               label: Text(_getExecuteButtonText()),
@@ -226,7 +256,10 @@ class _DashboardPageState extends State<DashboardPage> {
           OutlinedButton.icon(
             onPressed: () {
               final geoJsonStr = sl.measurementProvider.exportPlotToGeoJson();
-              _showExportDialog('GeoJSON FeatureCollection', geoJsonStr.isNotEmpty ? geoJsonStr : 'Select Plot Mode');
+              _showExportDialog(
+                'GeoJSON FeatureCollection',
+                geoJsonStr.isNotEmpty ? geoJsonStr : 'Select Plot Mode',
+              );
             },
             icon: const Icon(Icons.public),
             label: const Text('Export GeoJSON'),
@@ -250,7 +283,10 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (ctx) => AlertDialog(
         title: Text(title),
         content: SingleChildScrollView(
-          child: Text(content, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          child: Text(
+            content,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
         ),
         actions: [
           TextButton(
