@@ -12,11 +12,11 @@ void main() {
       final useCase = DetectCapabilitiesUseCase(repository);
       final provider = CapabilityProvider(detectCapabilitiesUseCase: useCase);
 
-      expect(provider.profile, isNull);
+      expect(provider.profile, isNotNull);
       await provider.loadCapabilities();
       expect(provider.isLoading, isFalse);
       expect(provider.profile, isNotNull);
-      expect(provider.profile!.osVersion, isNotEmpty);
+      expect(provider.profile.osVersion, isNotEmpty);
     });
   });
 }
