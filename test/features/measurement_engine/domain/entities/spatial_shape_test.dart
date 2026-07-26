@@ -1,7 +1,7 @@
+import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geomeasure/features/measurement_engine/domain/entities/spatial_shape.dart';
 import 'package:geomeasure/features/measurement_engine/domain/services/geodetic_calculator.dart';
-import 'dart:math';
 
 void main() {
   group('RectangleShape', () {
@@ -50,7 +50,7 @@ void main() {
       expect(t.validate(), isNull);
     });
 
-    test('G4: degenerate triangle (sideA + sideB == sideC) returns validation error', () {
+    test('degenerate triangle returns validation error', () {
       const t = TriangleShape(sideA: 1, sideB: 2, sideC: 3);
       expect(t.validate(), isNotNull);
       expect(t.calculateAreaInSquareMeters(), 0.0);
@@ -69,16 +69,23 @@ void main() {
 
   group('IrregularPolygonShape', () {
     test('Shoelace formula for 4x3 rectangle as polygon', () {
-      const p = IrregularPolygonShape(vertices: [
-        Point3D(0, 0), Point3D(4, 0), Point3D(4, 3), Point3D(0, 3),
-      ]);
+      const p = IrregularPolygonShape(
+        vertices: [
+          Point3D(0, 0),
+          Point3D(4, 0),
+          Point3D(4, 3),
+          Point3D(0, 3),
+        ],
+      );
       expect(p.calculateAreaInSquareMeters(), 12.0);
       expect(p.calculatePerimeterInMeters(), 14.0);
       expect(p.validate(), isNull);
     });
 
     test('returns 0 for fewer than 3 vertices', () {
-      const p = IrregularPolygonShape(vertices: [Point3D(0, 0), Point3D(1, 1)]);
+      const p = IrregularPolygonShape(
+        vertices: [Point3D(0, 0), Point3D(1, 1)],
+      );
       expect(p.calculateAreaInSquareMeters(), 0.0);
       expect(p.validate(), isNotNull);
     });
@@ -92,7 +99,8 @@ void main() {
   group('WallShape & WallOpening', () {
     test('net area deducts openings', () {
       const wall = WallShape(
-        lengthMeters: 6, heightMeters: 3,
+        lengthMeters: 6,
+        heightMeters: 3,
         openings: [
           WallOpening(label: 'Door', widthMeters: 1.0, heightMeters: 2.0),
           WallOpening(label: 'Window', widthMeters: 1.5, heightMeters: 1.0),
@@ -106,7 +114,8 @@ void main() {
 
     test('validation rejects openings exceeding wall area', () {
       const wall = WallShape(
-        lengthMeters: 2, heightMeters: 2,
+        lengthMeters: 2,
+        heightMeters: 2,
         openings: [
           WallOpening(label: 'Huge Door', widthMeters: 3, heightMeters: 3),
         ],
@@ -123,7 +132,12 @@ void main() {
   group('RoomShape', () {
     test('area and volume calculation', () {
       const room = RoomShape(
-        vertices: [Point3D(0, 0), Point3D(5, 0), Point3D(5, 4), Point3D(0, 4)],
+        vertices: [
+          Point3D(0, 0),
+          Point3D(5, 0),
+          Point3D(5, 4),
+          Point3D(0, 4),
+        ],
         heightMeters: 3.0,
       );
       expect(room.calculateAreaInSquareMeters(), 20.0);
@@ -133,7 +147,12 @@ void main() {
 
     test('validation rejects zero height', () {
       const room = RoomShape(
-        vertices: [Point3D(0, 0), Point3D(5, 0), Point3D(5, 4), Point3D(0, 4)],
+        vertices: [
+          Point3D(0, 0),
+          Point3D(5, 0),
+          Point3D(5, 4),
+          Point3D(0, 4),
+        ],
         heightMeters: 0,
       );
       expect(room.validate(), isNotNull);
@@ -142,21 +161,23 @@ void main() {
 
   group('PlotShape (GPS geodetic)', () {
     test('computes area and perimeter for outdoor parcel', () {
-      const plot = PlotShape(coordinates: [
-        GpsCoordinate(latitude: 37.7749, longitude: -122.4194),
-        GpsCoordinate(latitude: 37.7755, longitude: -122.4194),
-        GpsCoordinate(latitude: 37.7755, longitude: -122.4185),
-        GpsCoordinate(latitude: 37.7749, longitude: -122.4185),
-      ]);
+      const plot = PlotShape(
+        coordinates: [
+          GpsCoordinate(latitude: 37.7749, longitude: -122.4194),
+          GpsCoordinate(latitude: 37.7755, longitude: -122.4194),
+          GpsCoordinate(latitude: 37.7755, longitude: -122.4185),
+          GpsCoordinate(latitude: 37.7749, longitude: -122.4185),
+        ],
+      );
       expect(plot.calculateAreaInSquareMeters(), greaterThan(4000));
       expect(plot.calculatePerimeterInMeters(), greaterThan(200));
       expect(plot.validate(), isNull);
     });
 
     test('validation rejects fewer than 3 coordinates', () {
-      const plot = PlotShape(coordinates: [
-        GpsCoordinate(latitude: 0, longitude: 0),
-      ]);
+      const plot = PlotShape(
+        coordinates: [GpsCoordinate(latitude: 0, longitude: 0)],
+      );
       expect(plot.validate(), isNotNull);
     });
   });
@@ -168,19 +189,18 @@ void main() {
         numberOfFloors: 3,
         floorHeightMeters: 3.0,
       );
-      expect(building.calculateAreaInSquareMeters(), 900.0); // 300 * 3
-      expect(building.calculateVolumeInCubicMeters(), 2700.0); // 300 * 3 * 3
+      expect(building.calculateAreaInSquareMeters(), 900.0);
+      expect(building.calculateVolumeInCubicMeters(), 2700.0);
       expect(building.calculatePerimeterInMeters(), 70.0);
       expect(building.validate(), isNull);
     });
 
-    test('E5: total wall surface area', () {
+    test('total wall surface area', () {
       const building = BuildingShape(
         baseFootprint: RectangleShape(lengthMeters: 10, widthMeters: 8),
         numberOfFloors: 2,
         floorHeightMeters: 3.0,
       );
-      // perimeter 36 * height 3 * floors 2 = 216
       expect(building.calculateTotalWallSurfaceArea(), 216.0);
     });
 

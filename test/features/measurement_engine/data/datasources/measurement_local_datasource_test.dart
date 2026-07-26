@@ -6,7 +6,7 @@ import 'package:geomeasure/features/measurement_engine/domain/entities/measureme
 import 'package:geomeasure/features/measurement_engine/domain/entities/spatial_shape.dart';
 
 void main() {
-  group('MeasurementLocalDataSource — Persistence Round-Trip (G3/G8 Fix)', () {
+  group('MeasurementLocalDataSource — Persistence Round-Trip', () {
     late MeasurementLocalDataSourceImpl dataSource;
 
     setUp(() {
@@ -38,10 +38,14 @@ void main() {
 
     test('delete removes single measurement', () async {
       final result = MeasurementResult(
-        area: 10, areaUnit: AreaUnit.squareMeters,
-        perimeter: 20, distanceUnit: DistanceUnit.meters,
-        volume: 0, algorithmUsed: MeasurementAlgorithm.manual,
-        estimatedAccuracyPercentage: 80, shapeType: ShapeType.rectangle,
+        area: 10,
+        areaUnit: AreaUnit.squareMeters,
+        perimeter: 20,
+        distanceUnit: DistanceUnit.meters,
+        volume: 0,
+        algorithmUsed: MeasurementAlgorithm.manual,
+        estimatedAccuracyPercentage: 80,
+        shapeType: ShapeType.rectangle,
       );
 
       await dataSource.saveMeasurement('a', result);
@@ -54,10 +58,14 @@ void main() {
 
     test('clearAll removes everything', () async {
       final result = MeasurementResult(
-        area: 10, areaUnit: AreaUnit.squareMeters,
-        perimeter: 20, distanceUnit: DistanceUnit.meters,
-        volume: 0, algorithmUsed: MeasurementAlgorithm.manual,
-        estimatedAccuracyPercentage: 80, shapeType: ShapeType.rectangle,
+        area: 10,
+        areaUnit: AreaUnit.squareMeters,
+        perimeter: 20,
+        distanceUnit: DistanceUnit.meters,
+        volume: 0,
+        algorithmUsed: MeasurementAlgorithm.manual,
+        estimatedAccuracyPercentage: 80,
+        shapeType: ShapeType.rectangle,
       );
 
       await dataSource.saveMeasurement('x', result);

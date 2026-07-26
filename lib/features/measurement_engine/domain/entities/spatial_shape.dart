@@ -232,7 +232,9 @@ class PlotShape extends SpatialShape {
 
   @override
   String? validate() {
-    if (coordinates.length < 3) return 'Plot requires at least 3 GPS coordinates';
+    if (coordinates.length < 3) {
+      return 'Plot requires at least 3 GPS coordinates';
+    }
     return null;
   }
 
@@ -287,11 +289,15 @@ class BuildingShape extends SpatialShape {
 
   @override
   double calculateVolumeInCubicMeters() {
-    return baseFootprint.calculateAreaInSquareMeters() * numberOfFloors * floorHeightMeters;
+    return baseFootprint.calculateAreaInSquareMeters() *
+        numberOfFloors *
+        floorHeightMeters;
   }
 
   /// Total exterior wall surface area for all floors (E5).
   double calculateTotalWallSurfaceArea() {
-    return baseFootprint.calculatePerimeterInMeters() * floorHeightMeters * numberOfFloors;
+    return baseFootprint.calculatePerimeterInMeters() *
+        floorHeightMeters *
+        numberOfFloors;
   }
 }

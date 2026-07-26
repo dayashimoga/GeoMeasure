@@ -3,11 +3,15 @@ import '../../features/capability_detection/domain/entities/capability_profile.d
 import '../../features/capability_detection/domain/entities/sensor_type.dart';
 
 class PlatformChannelService {
-  static const MethodChannel _channel = MethodChannel('geomeasure/capability_detection');
+  static const MethodChannel _channel = MethodChannel(
+    'geomeasure/capability_detection',
+  );
 
   Future<CapabilityProfile> detectCapabilities() async {
     try {
-      final Map<dynamic, dynamic>? result = await _channel.invokeMethod('detectCapabilities');
+      final Map<dynamic, dynamic>? result = await _channel.invokeMethod(
+        'detectCapabilities',
+      );
       if (result != null) {
         return CapabilityProfile(
           hasLidar: result['hasLidar'] as bool? ?? false,
@@ -31,7 +35,8 @@ class PlatformChannelService {
           ramMb: result['ramMb'] as int? ?? 4096,
           cpuCores: result['cpuCores'] as int? ?? 8,
           storageAvailableMb: result['storageAvailableMb'] as int? ?? 2048,
-          displayResolution: result['displayResolution'] as String? ?? '1080x1920',
+          displayResolution:
+              result['displayResolution'] as String? ?? '1080x1920',
           osVersion: result['osVersion'] as String? ?? 'unknown',
           batteryLevel: (result['batteryLevel'] as num?)?.toDouble() ?? 1.0,
           thermalState: _parseThermalState(result['thermalState'] as String?),

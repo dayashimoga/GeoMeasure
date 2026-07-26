@@ -8,7 +8,10 @@ class MeasurementRepositoryImpl implements MeasurementRepository {
   MeasurementRepositoryImpl(this.dataSource);
 
   @override
-  Future<void> saveMeasurementResult(String id, MeasurementResult result) async {
+  Future<void> saveMeasurementResult(
+    String id,
+    MeasurementResult result,
+  ) async {
     await dataSource.saveMeasurement(id, result);
   }
 

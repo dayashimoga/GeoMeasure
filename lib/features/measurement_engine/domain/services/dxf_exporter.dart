@@ -2,7 +2,10 @@ import '../entities/spatial_shape.dart';
 
 class DxfExporter {
   /// Generates ASCII AutoCAD DXF (R12 standard) representation of a spatial shape
-  static String generateDxf(SpatialShape shape, {String layerName = 'GEOMEASURE_LAYER'}) {
+  static String generateDxf(
+    SpatialShape shape, {
+    String layerName = 'GEOMEASURE_LAYER',
+  }) {
     final buffer = StringBuffer();
 
     // DXF Header Section
@@ -59,7 +62,11 @@ class DxfExporter {
     return buffer.toString();
   }
 
-  static void _writePolyline(StringBuffer buffer, String layer, List<Point3D> points) {
+  static void _writePolyline(
+    StringBuffer buffer,
+    String layer,
+    List<Point3D> points,
+  ) {
     if (points.isEmpty) return;
 
     for (int i = 0; i < points.length; i++) {

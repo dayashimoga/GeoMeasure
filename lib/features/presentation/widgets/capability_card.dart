@@ -24,8 +24,14 @@ class CapabilityCard extends StatelessWidget {
             const SizedBox(height: 12),
             _buildSensorRow('LiDAR Sensor', profile.hasLidar),
             _buildSensorRow('ToF Depth Sensor', profile.hasDepthSensor),
-            _buildSensorRow('ARCore / ARKit Support', profile.hasArCore || profile.hasArKit),
-            _buildSensorRow('GPS / Magnetometer', profile.hasGps && profile.hasCompass),
+            _buildSensorRow(
+              'ARCore / ARKit Support',
+              profile.hasArCore || profile.hasArKit,
+            ),
+            _buildSensorRow(
+              'GPS / Magnetometer',
+              profile.hasGps && profile.hasCompass,
+            ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

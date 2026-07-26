@@ -21,9 +21,9 @@ void main() {
     });
 
     test('generates LINE entities for IrregularPolygon', () {
-      const poly = IrregularPolygonShape(vertices: [
-        Point3D(0, 0), Point3D(3, 0), Point3D(3, 4),
-      ]);
+      const poly = IrregularPolygonShape(
+        vertices: [Point3D(0, 0), Point3D(3, 0), Point3D(3, 4)],
+      );
       final dxf = DxfExporter.generateDxf(poly);
       expect(dxf, contains('LINE'));
     });

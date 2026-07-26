@@ -49,60 +49,110 @@ CapabilityProfile _buildProfile({
 }
 
 void main() {
-  group('AlgorithmSelector — Full Fallback Hierarchy (G9 Fix)', () {
+  group('AlgorithmSelector — Full Fallback Hierarchy', () {
     test('1. LiDAR available → selects LiDAR', () {
-      final p = _buildProfile(lidar: true, depth: true, arCore: true, camera: true, gps: true, compass: true);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.lidar);
+      final p = _buildProfile(
+        lidar: true,
+        depth: true,
+        arCore: true,
+        camera: true,
+        gps: true,
+        compass: true,
+      );
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.lidar,
+      );
     });
 
     test('2. Depth only → selects depthSensor', () {
       final p = _buildProfile(depth: true);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.depthSensor);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.depthSensor,
+      );
     });
 
     test('3. ARCore only → selects arCoreArKit', () {
       final p = _buildProfile(arCore: true);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.arCoreArKit);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.arCoreArKit,
+      );
     });
 
     test('4. Camera only → selects visualSlam', () {
       final p = _buildProfile(camera: true);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.visualSlam);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.visualSlam,
+      );
     });
 
     test('5. GPS + Compass only → selects gpsImu', () {
       final p = _buildProfile(gps: true, compass: true);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.gpsImu);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.gpsImu,
+      );
     });
 
     test('6. Bare device → selects manual', () {
       final p = _buildProfile();
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.manual);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.manual,
+      );
     });
 
     test('7. Permissions denied → forces manual even with LiDAR', () {
       final p = _buildProfile(lidar: true, permissions: false);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.manual);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.manual,
+      );
     });
 
-    test('G2: Critical thermal → forces manual', () {
+    test('Critical thermal → forces manual', () {
       final p = _buildProfile(lidar: true, thermal: ThermalState.critical);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.manual);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.manual,
+      );
     });
 
-    test('G2: Serious thermal with GPS → falls back to gpsImu', () {
-      final p = _buildProfile(lidar: true, gps: true, compass: true, thermal: ThermalState.serious);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.gpsImu);
+    test('Serious thermal with GPS → falls back to gpsImu', () {
+      final p = _buildProfile(
+        lidar: true,
+        gps: true,
+        compass: true,
+        thermal: ThermalState.serious,
+      );
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.gpsImu,
+      );
     });
 
-    test('G2: Low battery (<10%) with GPS → falls back to gpsImu', () {
-      final p = _buildProfile(lidar: true, gps: true, compass: true, battery: 0.05);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.gpsImu);
+    test('Low battery (<10%) with GPS → falls back to gpsImu', () {
+      final p = _buildProfile(
+        lidar: true,
+        gps: true,
+        compass: true,
+        battery: 0.05,
+      );
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.gpsImu,
+      );
     });
 
-    test('G2: Low battery (<10%) without GPS → falls back to manual', () {
+    test('Low battery (<10%) without GPS → falls back to manual', () {
       final p = _buildProfile(lidar: true, battery: 0.05);
-      expect(AlgorithmSelector.selectOptimalAlgorithm(p), MeasurementAlgorithm.manual);
+      expect(
+        AlgorithmSelector.selectOptimalAlgorithm(p),
+        MeasurementAlgorithm.manual,
+      );
     });
   });
 }

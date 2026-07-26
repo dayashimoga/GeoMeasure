@@ -4,7 +4,9 @@ class CsvExporter {
   /// Generates CSV Schedule for dimensional bill of materials and measurement summaries
   static String generateCsv(List<MeasurementResult> results) {
     final buffer = StringBuffer();
-    buffer.writeln('ID,Technique,ShapeType,ShapeName,Area,AreaUnit,Perimeter,DistanceUnit,Volume,AccuracyPercentage,Timestamp');
+    buffer.writeln(
+      'ID,Technique,ShapeType,ShapeName,Area,AreaUnit,Perimeter,DistanceUnit,Volume,AccuracyPercentage,Timestamp',
+    );
 
     for (int i = 0; i < results.length; i++) {
       final res = results[i];

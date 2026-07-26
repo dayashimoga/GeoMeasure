@@ -7,7 +7,9 @@ import 'package:geomeasure/features/measurement_engine/domain/entities/spatial_s
 import 'package:geomeasure/features/presentation/widgets/measurement_display.dart';
 
 void main() {
-  testWidgets('MeasurementDisplay renders result', (WidgetTester tester) async {
+  testWidgets('MeasurementDisplay renders result', (
+    WidgetTester tester,
+  ) async {
     final result = MeasurementResult(
       area: 25.5,
       areaUnit: AreaUnit.squareMeters,
@@ -19,8 +21,13 @@ void main() {
       shapeType: ShapeType.room,
       shapeName: 'Living Room',
     );
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: MeasurementDisplay(result: result))));
-    expect(find.text('Selected Technique: ARCore / ARKit Visual-Inertial'), findsOneWidget);
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: MeasurementDisplay(result: result))),
+    );
+    expect(
+      find.text('Selected Technique: ARCore / ARKit Visual-Inertial'),
+      findsOneWidget,
+    );
     expect(find.text('Estimated Accuracy: 95.0%'), findsOneWidget);
   });
 }

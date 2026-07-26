@@ -45,11 +45,18 @@ class MeasurementResult {
       area: (map['area'] as num).toDouble(),
       areaUnit: AreaUnit.values.firstWhere((e) => e.name == map['areaUnit']),
       perimeter: (map['perimeter'] as num).toDouble(),
-      distanceUnit: DistanceUnit.values.firstWhere((e) => e.name == map['distanceUnit']),
+      distanceUnit: DistanceUnit.values.firstWhere(
+        (e) => e.name == map['distanceUnit'],
+      ),
       volume: (map['volume'] as num).toDouble(),
-      algorithmUsed: MeasurementAlgorithm.values.firstWhere((e) => e.name == map['algorithmUsed']),
-      estimatedAccuracyPercentage: (map['estimatedAccuracyPercentage'] as num).toDouble(),
-      timestamp: DateTime.tryParse(map['timestamp'] as String? ?? '') ?? DateTime.now(),
+      algorithmUsed: MeasurementAlgorithm.values.firstWhere(
+        (e) => e.name == map['algorithmUsed'],
+      ),
+      estimatedAccuracyPercentage:
+          (map['estimatedAccuracyPercentage'] as num).toDouble(),
+      timestamp:
+          DateTime.tryParse(map['timestamp'] as String? ?? '') ??
+          DateTime.now(),
       shapeType: ShapeType.values.firstWhere(
         (e) => e.name == map['shapeType'],
         orElse: () => ShapeType.rectangle,

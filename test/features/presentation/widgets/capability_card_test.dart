@@ -4,9 +4,13 @@ import 'package:geomeasure/features/capability_detection/domain/entities/capabil
 import 'package:geomeasure/features/presentation/widgets/capability_card.dart';
 
 void main() {
-  testWidgets('CapabilityCard renders sensor availability', (WidgetTester tester) async {
+  testWidgets('CapabilityCard renders sensor availability', (
+    WidgetTester tester,
+  ) async {
     final profile = CapabilityProfile.fallbackManual();
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: CapabilityCard(profile: profile))));
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: CapabilityCard(profile: profile))),
+    );
     expect(find.text('Hardware Capability Matrix'), findsOneWidget);
     expect(find.text('LiDAR Sensor'), findsOneWidget);
     expect(find.text('Memory: 2048 MB'), findsOneWidget);

@@ -27,14 +27,20 @@ class ServiceLocator {
     hardwareCapabilityDataSource = HardwareCapabilityDataSourceImpl(
       platformService: platformChannelService,
     );
-    capabilityRepository = CapabilityRepositoryImpl(hardwareCapabilityDataSource);
-    detectCapabilitiesUseCase = DetectCapabilitiesUseCase(capabilityRepository);
+    capabilityRepository = CapabilityRepositoryImpl(
+      hardwareCapabilityDataSource,
+    );
+    detectCapabilitiesUseCase = DetectCapabilitiesUseCase(
+      capabilityRepository,
+    );
     capabilityProvider = CapabilityProvider(
       detectCapabilitiesUseCase: detectCapabilitiesUseCase,
     );
 
     measurementLocalDataSource = MeasurementLocalDataSourceImpl();
-    measurementRepository = MeasurementRepositoryImpl(measurementLocalDataSource);
+    measurementRepository = MeasurementRepositoryImpl(
+      measurementLocalDataSource,
+    );
     executeMeasurementUseCase = ExecuteMeasurementUseCase();
     measurementProvider = MeasurementProvider(
       executeMeasurementUseCase: executeMeasurementUseCase,

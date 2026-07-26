@@ -8,7 +8,9 @@ void main() {
     sl.init();
   });
 
-  testWidgets('DashboardPage renders mode tabs and execute button', (WidgetTester tester) async {
+  testWidgets('DashboardPage renders mode tabs and execute button', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
     await tester.pumpAndSettle();
 
@@ -17,7 +19,10 @@ void main() {
     expect(find.text('Wall'), findsOneWidget);
     expect(find.text('Plot / Land'), findsOneWidget);
 
-    final executeBtn = find.widgetWithText(ElevatedButton, 'Measure Room Enclosure');
+    final executeBtn = find.widgetWithText(
+      ElevatedButton,
+      'Measure Room Enclosure',
+    );
     expect(executeBtn, findsOneWidget);
     await tester.tap(executeBtn);
     await tester.pumpAndSettle();
