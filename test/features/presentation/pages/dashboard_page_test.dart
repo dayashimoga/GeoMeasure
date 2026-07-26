@@ -24,7 +24,7 @@ void main() {
     expect(find.text('Wall'), findsOneWidget);
     expect(find.text('Plot / Land'), findsOneWidget);
 
-    final executeButton = find.byType(ElevatedButton);
+    final executeButton = find.byKey(const Key('execute_measurement_button'));
     expect(executeButton, findsOneWidget);
 
     await tester.tap(executeButton);

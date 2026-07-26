@@ -169,6 +169,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 12),
             ElevatedButton.icon(
+              key: const Key('execute_measurement_button'),
               onPressed: () {
                 SpatialShape shape;
                 if (_selectedModeIndex == 0) {
