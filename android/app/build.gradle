@@ -6,8 +6,8 @@ plugins {
 
 android {
     namespace "com.geomeasure.app"
-    compileSdk 34
-    ndkVersion "25.1.8937393"
+    compileSdk 35
+    ndkVersion "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -21,9 +21,9 @@ android {
     defaultConfig {
         applicationId "com.geomeasure.app"
         minSdk 24
-        targetSdk 34
-        versionCode 1
-        versionName "1.0.0"
+        targetSdk 35
+        versionCode 9
+        versionName "2.3.0"
     }
 
     buildTypes {
