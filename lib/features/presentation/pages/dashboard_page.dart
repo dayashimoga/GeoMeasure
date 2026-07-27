@@ -13,6 +13,7 @@ import '../../visualization/presentation/widgets/floor_plan_canvas.dart';
 import '../widgets/capability_card.dart';
 import '../widgets/measurement_display.dart';
 import 'gps_tracking_page.dart';
+import 'camera_measurement_page.dart';
 import 'measurement_history_page.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -128,7 +129,7 @@ class _DashboardPageState extends State<DashboardPage>
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => sl.capabilityProvider.loadCapabilities(),
+            onPressed: () => sl.capabilityProvider.forceRefresh(),
             tooltip: 'Refresh Capabilities',
           ),
         ],
@@ -148,6 +149,19 @@ class _DashboardPageState extends State<DashboardPage>
           _buildProjectsTab(),
           _buildSettingsTab(theme),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          final profile = sl.capabilityProvider.profile;
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CameraMeasurementPage(profile: profile),
+            ),
+          );
+        },
+        icon: const Icon(Icons.camera_alt_rounded),
+        label: const Text('Camera'),
+        tooltip: 'Camera Measurement',
       ),
     );
   }
