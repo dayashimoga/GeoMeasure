@@ -8,6 +8,7 @@ import '../../measurement_engine/domain/entities/measurement_unit.dart';
 import '../../measurement_engine/domain/entities/spatial_shape.dart';
 import '../../measurement_engine/domain/services/geodetic_calculator.dart';
 import '../../measurement_engine/domain/services/unit_converter.dart';
+import '../../estimation/domain/entities/material_estimate.dart';
 import '../../visualization/presentation/widgets/floor_plan_canvas.dart';
 import '../widgets/capability_card.dart';
 import '../widgets/measurement_display.dart';
@@ -505,10 +506,141 @@ class _DashboardPageState extends State<DashboardPage>
         return Column(
           children: [
             MeasurementDisplay(result: result),
+            _buildMaterialEstimation(),
             _buildExportButtons(),
+            _buildNavigationButtons(),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildMaterialEstimation() {
+    final shape = sl.measurementProvider.lastShape;
+    if (shape == null) return const SizedBox.shrink();
+
+    QuantityTakeoff? takeoff;
+    if (shape is RoomShape) {
+      takeoff = MaterialEstimator.estimateForRoom(shape);
+    } else if (shape is BuildingShape) {
+      takeoff = MaterialEstimator.estimateForBuilding(shape);
+    }
+    if (takeoff == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    return Card(
+      child: ExpansionTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                theme.colorScheme.tertiary.withValues(alpha: 0.15),
+                theme.colorScheme.tertiary.withValues(alpha: 0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(Icons.construction_rounded,
+              color: theme.colorScheme.tertiary, size: 22),
+        ),
+        title: const Text(
+          'Material Estimation',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          '${takeoff.items.length} materials • \$${takeoff.totalCost.toStringAsFixed(0)} est.',
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+        initiallyExpanded: false,
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: [
+          ...takeoff.items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.material.name.replaceAll(
+                            RegExp(r'([A-Z])'), r' $1').trim(),
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    Text(
+                      '${item.adjustedQuantity.toStringAsFixed(1)} ${item.unit.name}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    if (item.totalCost > 0) ...[                      const SizedBox(width: 8),
+                      Text(
+                        '\$${item.totalCost.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              )),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Total Estimated Cost',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface)),
+              Text(
+                '\$${takeoff.totalCost.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const MeasurementHistoryPage()),
+              ),
+              icon: const Icon(Icons.history_rounded, size: 18),
+              label: const Text('History'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const GpsTrackingPage()),
+              ),
+              icon: const Icon(Icons.gps_fixed_rounded, size: 18),
+              label: const Text('GPS Track'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
