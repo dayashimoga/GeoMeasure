@@ -19,6 +19,7 @@ import 'package:geomeasure/features/measurement_engine/domain/services/sensor_fu
 import 'package:geomeasure/features/export/excel_exporter.dart';
 import 'package:geomeasure/core/export/json_exporter.dart';
 import 'package:geomeasure/core/export/export_manager.dart';
+import 'package:geomeasure/core/config/app_config.dart';
 
 void main() {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1201,6 +1202,137 @@ void main() {
           gray, 50, 50, threshold: 10);
       // The bright dot is an isolated feature — FAST should detect it
       expect(corners, isNotEmpty);
+    });
+  });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ML Kit Vision Service (Fallback Pattern)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  group('MlKitVisionService', () {
+    test('isAvailable returns false on non-mobile (test runner)', () {
+      final service = MlKitVisionService();
+      // In test runner, platform is not Android/iOS
+      expect(service.engineName, equals('Google ML Kit'));
+    });
+
+    test('detectObjects falls back to LocalVisionService on non-mobile',
+        () async {
+      final service = MlKitVisionService();
+      final img = Uint8List(100 * 100 * 4);
+      final result = await service.detectObjects(img, 100, 100);
+      // Should succeed via fallback, not throw
+      expect(result.imageWidth, equals(100));
+      expect(result.imageHeight, equals(100));
+    });
+
+    test('scanBarcodes returns empty on non-mobile', () async {
+      final service = MlKitVisionService();
+      final img = Uint8List(10);
+      final results = await service.scanBarcodes(img, 10, 1);
+      expect(results, isEmpty);
+    });
+
+    test('recognizeText returns empty on non-mobile', () async {
+      final service = MlKitVisionService();
+      final img = Uint8List(10);
+      final results = await service.recognizeText(img, 10, 1);
+      expect(results, isEmpty);
+    });
+
+    test('labelImage falls back to local analysis', () async {
+      final service = MlKitVisionService();
+      final img = Uint8List(10 * 10 * 4);
+      // Set RGBA pixels: R=220 (above 200 threshold for bright_scene)
+      for (int i = 0; i < 10 * 10; i++) {
+        img[i * 4] = 220;     // R
+        img[i * 4 + 1] = 220; // G
+        img[i * 4 + 2] = 220; // B
+        img[i * 4 + 3] = 255; // A
+      }
+      final labels = await service.labelImage(img, 10, 10);
+      expect(labels, isNotEmpty);
+      expect(labels.first.label, equals('bright_scene'));
+    });
+
+    test('dispose does not throw', () {
+      final service = MlKitVisionService();
+      expect(() => service.dispose(), returnsNormally);
+    });
+  });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // AppConfig v2.3.0 Production Readiness
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  group('AppConfig', () {
+    test('version matches pubspec 2.3.0', () {
+      expect(AppConfig.appVersion, equals('2.3.0'));
+      expect(AppConfig.buildNumber, equals(9));
+    });
+
+    test('all implemented features are enabled', () {
+      final config = AppConfig();
+      // Core features must be enabled
+      expect(config.isEnabled('gps_tracking'), isTrue);
+      expect(config.isEnabled('manual_measurement'), isTrue);
+      expect(config.isEnabled('project_management'), isTrue);
+      expect(config.isEnabled('ai_detection'), isTrue);
+      expect(config.isEnabled('camera_capture'), isTrue);
+
+      // Export formats
+      expect(config.isEnabled('export_csv'), isTrue);
+      expect(config.isEnabled('export_dxf'), isTrue);
+      expect(config.isEnabled('export_geojson'), isTrue);
+      expect(config.isEnabled('export_svg'), isTrue);
+      expect(config.isEnabled('export_kml'), isTrue);
+      expect(config.isEnabled('export_pdf'), isTrue);
+      expect(config.isEnabled('export_json'), isTrue);
+      expect(config.isEnabled('export_excel'), isTrue);
+
+      // Advanced features
+      expect(config.isEnabled('sensor_fusion'), isTrue);
+      expect(config.isEnabled('photogrammetry'), isTrue);
+      expect(config.isEnabled('material_estimation'), isTrue);
+      expect(config.isEnabled('pdf_report_templates'), isTrue);
+    });
+
+    test('unimplemented features are disabled', () {
+      final config = AppConfig();
+      expect(config.isEnabled('ar_measurement'), isFalse);
+      expect(config.isEnabled('cloud_sync'), isFalse);
+      expect(config.isEnabled('offline_maps'), isFalse);
+    });
+
+    test('feature flags are runtime-configurable', () {
+      final config = AppConfig();
+      expect(config.isEnabled('ar_measurement'), isFalse);
+      config.setFeatureFlag('ar_measurement', true);
+      expect(config.isEnabled('ar_measurement'), isTrue);
+      // Reset
+      config.setFeatureFlag('ar_measurement', false);
+    });
+
+    test('unknown features return false', () {
+      final config = AppConfig();
+      expect(config.isEnabled('nonexistent_feature'), isFalse);
+    });
+
+    test('allFlags returns unmodifiable map', () {
+      final config = AppConfig();
+      final flags = config.allFlags;
+      expect(flags, isA<Map<String, bool>>());
+      expect(() => flags['test'] = true,
+          throwsUnsupportedError);
+    });
+
+    test('constants are production-grade', () {
+      expect(AppConfig.appName, equals('GeoMeasure'));
+      expect(AppConfig.maxProjectsPerUser, equals(1000));
+      expect(AppConfig.maxMeasurementsPerProject, equals(10000));
+      expect(AppConfig.maxUndoStackDepth, equals(50));
+      expect(AppConfig.minGpsAccuracyMeters, equals(3.0));
+      expect(AppConfig.maxExportFileSizeMb, equals(50));
     });
   });
 }

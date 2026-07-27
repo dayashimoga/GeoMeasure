@@ -8,24 +8,37 @@ class AppConfig {
   AppConfig._();
 
   final Map<String, bool> _featureFlags = {
-    'ar_measurement': false,
-    'ai_detection': false,
-    'cloud_sync': false,
-    'offline_maps': false,
-    'pdf_export': false,
-    'camera_capture': false,
-    'gps_tracking': true,
+    // ── Measurement modes ──
     'manual_measurement': true,
-    'project_management': true,
+    'gps_tracking': true,
+    'ar_measurement': false, // Requires native ARCore/ARKit binding
+    'ai_detection': true,
+
+    // ── Platform services ──
+    'camera_capture': true,
+    'cloud_sync': false, // Requires backend API
+    'offline_maps': false, // Requires tile server
+
+    // ── Export formats ──
     'export_csv': true,
     'export_dxf': true,
     'export_geojson': true,
     'export_svg': true,
     'export_kml': true,
+    'export_pdf': true,
+    'export_json': true,
+    'export_excel': true,
+
+    // ── UI & features ──
     'dark_mode': true,
     'undo_redo': true,
     'floor_plan_canvas': true,
     'multi_project': true,
+    'project_management': true,
+    'material_estimation': true,
+    'sensor_fusion': true,
+    'photogrammetry': true,
+    'pdf_report_templates': true,
   };
 
   bool isEnabled(String feature) => _featureFlags[feature] ?? false;
@@ -38,8 +51,8 @@ class AppConfig {
 
   /// Environment configuration
   static const String appName = 'GeoMeasure';
-  static const String appVersion = '1.2.0';
-  static const int buildNumber = 2;
+  static const String appVersion = '2.3.0';
+  static const int buildNumber = 9;
   static const int maxProjectsPerUser = 1000;
   static const int maxMeasurementsPerProject = 10000;
   static const int maxUndoStackDepth = 50;
