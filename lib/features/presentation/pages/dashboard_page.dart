@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../capability_detection/domain/entities/capability_profile.dart';
@@ -212,74 +213,93 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildAlgorithmBanner(CapabilityProfile profile) {
-    final algo = sl.measurementProvider.lastResult?.algorithmUsed;
-    final algoName = algo?.displayName ?? 'Detecting...';
+    final isLoading = sl.capabilityProvider.isLoading;
+    final algo = sl.measurementProvider.lastResult?.algorithmUsed
+        ?? (isLoading ? null : profile.bestAlgorithm);
+    final algoName = isLoading
+        ? 'Detecting hardware...'
+        : (algo?.displayName ?? 'Manual Input Fallback');
     final algoColor = algo != null
         ? AppTheme.algorithmColor(algo.name)
         : Theme.of(context).colorScheme.outline;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [algoColor.withValues(alpha: 0.15), Colors.transparent],
+          colors: [
+            algoColor.withValues(alpha: 0.18),
+            algoColor.withValues(alpha: 0.05),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.6, 1.0],
         ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: algoColor.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: algoColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: algoColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                    color: algoColor.withValues(alpha: 0.4), blurRadius: 6)
-              ],
-            ),
-          ),
+          _PulsingDot(color: algoColor, isAnimating: isLoading),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Active Engine',
+                  isLoading ? 'Scanning Sensors' : 'Active Engine',
                   style: TextStyle(
                     fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
                         .withValues(alpha: 0.6),
                   ),
                 ),
-                Text(
-                  algoName,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: algoColor,
+                const SizedBox(height: 2),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: Text(
+                    algoName,
+                    key: ValueKey(algoName),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: algoColor,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          if (algo != null)
-            Chip(
-              label: Text(
-                '${sl.measurementProvider.lastResult?.estimatedAccuracyPercentage.toStringAsFixed(0)}%',
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          if (algo != null && !isLoading)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: algoColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
               ),
-              backgroundColor: algoColor.withValues(alpha: 0.15),
-              side: BorderSide.none,
-              padding: EdgeInsets.zero,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sensors_rounded, size: 14, color: algoColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    sl.measurementProvider.lastResult != null
+                        ? '${sl.measurementProvider.lastResult!.estimatedAccuracyPercentage.toStringAsFixed(0)}%'
+                        : '${profile.sensorCount} sensors',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: algoColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
         ],
       ),
@@ -786,7 +806,8 @@ class _DashboardPageState extends State<DashboardPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('GeoMeasure v1.2.0',
+                Text('GeoMeasure v${AppConfig.appVersion}',
+                    key: const Key('app_version_text'),
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.primary)),
@@ -831,6 +852,34 @@ class _DashboardPageState extends State<DashboardPage>
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Status dot indicator for sensor detection.
+class _PulsingDot extends StatelessWidget {
+  final Color color;
+  final bool isAnimating;
+
+  const _PulsingDot({required this.color, required this.isAnimating});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isAnimating ? 0.6 : 1.0),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.4),
+            blurRadius: isAnimating ? 10 : 6,
+            spreadRadius: isAnimating ? 2 : 0,
           ),
         ],
       ),
