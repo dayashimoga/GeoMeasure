@@ -1,4 +1,5 @@
 import 'sensor_type.dart';
+import '../../../measurement_engine/domain/entities/measurement_algorithm.dart';
 
 class CapabilityProfile {
   final bool hasLidar;
@@ -124,4 +125,55 @@ class CapabilityProfile {
         'networkType': networkType.name,
         'permissionsGranted': permissionsGranted,
       };
+
+  /// Auto-select the best measurement engine based on detected hardware.
+  /// Priority: LiDAR → Depth → AR → Visual SLAM → GPS → Manual.
+  MeasurementAlgorithm get bestAlgorithm {
+    if (hasLidar) return MeasurementAlgorithm.lidar;
+    if (hasDepthSensor) return MeasurementAlgorithm.depthSensor;
+    if (hasArCore || hasArKit) return MeasurementAlgorithm.arCoreArKit;
+    if (hasCamera && hasGyroscope && hasAccelerometer) {
+      return MeasurementAlgorithm.visualSlam;
+    }
+    if (hasGps && hasCompass) return MeasurementAlgorithm.gpsImu;
+    return MeasurementAlgorithm.manual;
+  }
+
+  /// Count of detected sensors.
+  int get sensorCount {
+    int count = 0;
+    if (hasLidar) count++;
+    if (hasDepthSensor) count++;
+    if (hasArCore) count++;
+    if (hasArKit) count++;
+    if (hasCamera) count++;
+    if (hasGps) count++;
+    if (hasCompass) count++;
+    if (hasGyroscope) count++;
+    if (hasAccelerometer) count++;
+    if (hasBarometer) count++;
+    if (hasBluetooth) count++;
+    if (hasNfc) count++;
+    if (hasAiAccelerator) count++;
+    return count;
+  }
+
+  /// Names of detected sensors for UI display.
+  List<String> get detectedSensorNames {
+    final sensors = <String>[];
+    if (hasLidar) sensors.add('LiDAR');
+    if (hasDepthSensor) sensors.add('Depth');
+    if (hasArCore) sensors.add('ARCore');
+    if (hasArKit) sensors.add('ARKit');
+    if (hasCamera) sensors.add('Camera');
+    if (hasGps) sensors.add('GPS');
+    if (hasCompass) sensors.add('Compass');
+    if (hasGyroscope) sensors.add('Gyro');
+    if (hasAccelerometer) sensors.add('Accel');
+    if (hasBarometer) sensors.add('Baro');
+    if (hasBluetooth) sensors.add('BT');
+    if (hasNfc) sensors.add('NFC');
+    if (hasAiAccelerator) sensors.add('AI');
+    return sensors;
+  }
 }

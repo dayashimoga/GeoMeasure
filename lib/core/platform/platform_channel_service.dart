@@ -6,13 +6,13 @@ import '../logging/app_logger.dart';
 /// Each platform implements a subset of capability queries.
 /// Desktop platforms report available sensors via OS APIs.
 class PlatformChannelService {
-  static const _channel = MethodChannel('com.geomeasure.app/capabilities');
+  static const _channel = MethodChannel('geomeasure/capability_detection');
 
   /// Query hardware capabilities from the native platform.
   Future<Map<String, dynamic>> queryCapabilities() async {
     try {
       final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
-        'getHardwareCapabilities',
+        'detectCapabilities',
       );
       if (result != null) {
         return result.cast<String, dynamic>();
