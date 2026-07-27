@@ -66,7 +66,7 @@ class PdfExporter {
                 children: [
                   pw.Text(
                     project.name,
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                       fontSize: 24,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.blue900,
@@ -76,7 +76,7 @@ class PdfExporter {
                     pw.SizedBox(height: 8),
                     pw.Text(
                       project.description!,
-                      style: const pw.TextStyle(
+                      style: pw.TextStyle(
                         fontSize: 12,
                         color: PdfColors.grey700,
                       ),
@@ -109,7 +109,7 @@ class PdfExporter {
                             borderRadius: pw.BorderRadius.circular(4),
                           ),
                           child: pw.Text(t,
-                              style: const pw.TextStyle(
+                              style: pw.TextStyle(
                                   fontSize: 10, color: PdfColors.blue800)),
                         ))
                     .toList(),
@@ -118,7 +118,7 @@ class PdfExporter {
             pw.SizedBox(height: 24),
             pw.Text(
               'Measurement Details',
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontSize: 16,
                 fontWeight: pw.FontWeight.bold,
               ),
@@ -127,7 +127,7 @@ class PdfExporter {
             // Measurement table
             if (project.measurements.isNotEmpty)
               pw.TableHelper.fromTextArray(
-                headerStyle: const pw.TextStyle(
+                headerStyle: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
                   fontSize: 10,
                   color: PdfColors.white,
@@ -135,7 +135,7 @@ class PdfExporter {
                 headerDecoration: const pw.BoxDecoration(
                   color: PdfColors.blue800,
                 ),
-                cellStyle: const pw.TextStyle(fontSize: 9),
+                cellStyle: pw.TextStyle(fontSize: 9),
                 cellPadding: const pw.EdgeInsets.all(6),
                 headers: [
                   '#',
@@ -180,7 +180,7 @@ class PdfExporter {
               children: [
                 pw.Text(
                   'GeoMeasure',
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 28,
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.blue800,
@@ -188,7 +188,7 @@ class PdfExporter {
                 ),
                 pw.Text(
                   title,
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 14,
                     color: PdfColors.grey600,
                   ),
@@ -200,7 +200,7 @@ class PdfExporter {
               children: [
                 pw.Text(
                   DateTime.now().toString().substring(0, 16),
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 10,
                     color: PdfColors.grey500,
                   ),
@@ -208,7 +208,7 @@ class PdfExporter {
                 if (subtitle != null)
                   pw.Text(
                     subtitle,
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                       fontSize: 10,
                       color: PdfColors.grey500,
                     ),
@@ -252,11 +252,11 @@ class PdfExporter {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(label,
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
                   fontSize: 11,
                   color: PdfColors.grey800)),
-          pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
+          pw.Text(value, style: pw.TextStyle(fontSize: 11)),
         ],
       ),
     );
@@ -274,15 +274,15 @@ class PdfExporter {
         children: [
           pw.Text('Metadata',
               style:
-                  const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                  pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
           pw.SizedBox(height: 4),
           pw.Text('Shape: ${result.shapeType.name}',
-              style: const pw.TextStyle(fontSize: 9)),
+              style: pw.TextStyle(fontSize: 9)),
           pw.Text('Timestamp: ${result.timestamp.toIso8601String()}',
-              style: const pw.TextStyle(fontSize: 9)),
+              style: pw.TextStyle(fontSize: 9)),
           if (result.shapeName.isNotEmpty)
             pw.Text('Name: ${result.shapeName}',
-                style: const pw.TextStyle(fontSize: 9)),
+                style: pw.TextStyle(fontSize: 9)),
         ],
       ),
     );
@@ -301,11 +301,11 @@ class PdfExporter {
           children: [
             pw.Text(
               'Generated by GeoMeasure v1.4.0',
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+              style: pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
             ),
             pw.Text(
               'www.geomeasure.app',
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+              style: pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
             ),
           ],
         ),
@@ -317,10 +317,10 @@ class PdfExporter {
     return pw.Column(
       children: [
         pw.Text(label,
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+            style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
         pw.SizedBox(height: 2),
         pw.Text(value,
-            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
       ],
     );
   }

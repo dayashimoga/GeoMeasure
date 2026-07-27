@@ -4,7 +4,7 @@
 # ============================================================
 
 # Stage 1: Flutter + Android SDK base image
-FROM ghcr.io/cirrusci/flutter:3.22.0 AS flutter-base
+FROM ghcr.io/cirrusci/flutter:stable AS flutter-base
 
 # Accept Android SDK licenses
 RUN yes | flutter doctor --android-licenses 2>/dev/null || true
