@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/data/backup_service.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_theme.dart';
@@ -306,7 +307,7 @@ class _DashboardPageState extends State<DashboardPage>
                   Text(
                     sl.measurementProvider.lastResult != null
                         ? '${sl.measurementProvider.lastResult!.estimatedAccuracyPercentage.toStringAsFixed(0)}%'
-                        : '${profile.sensorCount} sensors',
+                        : '${profile.bestConfidence.toStringAsFixed(0)}% conf',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -1247,6 +1248,124 @@ class _DashboardPageState extends State<DashboardPage>
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // ── Data Management ──
+        Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  'DATA MANAGEMENT',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.backup_rounded,
+                    color: theme.colorScheme.primary),
+                title: const Text('Create Backup'),
+                subtitle: const Text('Export all projects & measurements'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () async {
+                  final backup = await BackupService.createBackup();
+                  final count = (backup['data'] as Map).values
+                      .whereType<Map>()
+                      .fold<int>(0, (s, m) => s + m.length);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Backup ready: $count items'),
+                    behavior: SnackBarBehavior.floating,
+                  ));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.restore_rounded,
+                    color: theme.colorScheme.primary),
+                title: const Text('Restore from Backup'),
+                subtitle: const Text('Import from backup file'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Restore from Backup'),
+                      content: const Text(
+                        'Place a GeoMeasure backup file (.json) in your '
+                        'device storage, then use the file manager to open it.\n\n'
+                        'Filename format: geomeasure_backup_YYYYMMDD_HHMM.json',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.sensors_rounded,
+                    color: theme.colorScheme.primary),
+                title: const Text('Hardware Diagnostics'),
+                subtitle: const Text('View all detected sensors'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  final profile = sl.capabilityProvider.profile;
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (ctx) => DraggableScrollableSheet(
+                      initialChildSize: 0.6,
+                      maxChildSize: 0.9,
+                      minChildSize: 0.3,
+                      expand: false,
+                      builder: (_, ctrl) => ListView(
+                        controller: ctrl,
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40, height: 4,
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          Text('Hardware Diagnostics',
+                              style: theme.textTheme.titleLarge),
+                          const SizedBox(height: 8),
+                          ...profile.toJson().entries.map(
+                            (e) => ListTile(
+                              dense: true,
+                              title: Text(e.key),
+                              trailing: Text(
+                                e.value.toString(),
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],
