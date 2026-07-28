@@ -11,13 +11,16 @@ import '../../measurement_engine/domain/services/geodetic_calculator.dart';
 import '../../measurement_engine/domain/services/unit_converter.dart';
 import '../../estimation/domain/entities/material_estimate.dart';
 import '../../visualization/presentation/widgets/floor_plan_canvas.dart';
-import '../widgets/capability_card.dart';
 import '../widgets/measurement_display.dart';
 import 'gps_tracking_page.dart';
 import 'camera_measurement_page.dart';
 import 'measurement_history_page.dart';
 import 'measurement_wizard_page.dart';
 
+/// Consumer-grade Universal AI Measurement Platform Dashboard.
+///
+/// Features auto hardware selection, camera-first workflows,
+/// Material 3 styling, and clean spacing without diagnostic clutter.
 class DashboardPage extends StatefulWidget {
   final VoidCallback? onToggleTheme;
 
@@ -53,6 +56,7 @@ class _DashboardPageState extends State<DashboardPage>
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -62,43 +66,53 @@ class _DashboardPageState extends State<DashboardPage>
                 gradient: LinearGradient(
                   colors: [
                     theme.colorScheme.primary,
-                    theme.colorScheme.secondary,
+                    theme.colorScheme.tertiary,
                   ],
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child:
-                  const Icon(Icons.architecture, color: Colors.white, size: 20),
+              child: const Icon(Icons.architecture_rounded,
+                  color: Colors.white, size: 20),
             ),
             const SizedBox(width: 10),
-            const Text('GeoMeasure'),
+            const Text(
+              'GeoMeasure',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
           ],
         ),
         actions: [
-          // GPS tracking
+          IconButton(
+            icon: const Icon(Icons.auto_fix_high_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const MeasurementWizardPage(),
+              ),
+            ),
+            tooltip: 'Measurement Wizard',
+          ),
           IconButton(
             icon: const Icon(Icons.gps_fixed_rounded),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const GpsTrackingPage()),
             ),
-            tooltip: 'GPS Land Survey',
+            tooltip: 'GPS Survey',
           ),
-          // Measurement history
           IconButton(
             icon: const Icon(Icons.history_rounded),
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const MeasurementHistoryPage()),
+              MaterialPageRoute(
+                  builder: (_) => const MeasurementHistoryPage()),
             ),
-            tooltip: 'Measurement History',
+            tooltip: 'History',
           ),
-          // Undo/Redo
           ListenableBuilder(
             listenable: sl.measurementProvider,
             builder: (context, _) => Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.undo_rounded),
+                  icon: const Icon(Icons.undo_rounded, size: 20),
                   onPressed: sl.commandManager.canUndo
                       ? () {
                           sl.commandManager.undo();
@@ -108,7 +122,7 @@ class _DashboardPageState extends State<DashboardPage>
                   tooltip: sl.commandManager.lastUndoDescription ?? 'Undo',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.redo_rounded),
+                  icon: const Icon(Icons.redo_rounded, size: 20),
                   onPressed: sl.commandManager.canRedo
                       ? () {
                           sl.commandManager.redo();
@@ -129,18 +143,14 @@ class _DashboardPageState extends State<DashboardPage>
             onPressed: widget.onToggleTheme,
             tooltip: 'Toggle Theme',
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => sl.capabilityProvider.forceRefresh(),
-            tooltip: 'Refresh Capabilities',
-          ),
         ],
         bottom: TabBar(
           controller: _tabController,
+          indicatorWeight: 3,
           tabs: const [
-            Tab(icon: Icon(Icons.dashboard_rounded), text: 'Measure'),
-            Tab(icon: Icon(Icons.folder_rounded), text: 'Projects'),
-            Tab(icon: Icon(Icons.settings_rounded), text: 'Settings'),
+            Tab(icon: Icon(Icons.straighten_rounded), text: 'Measure'),
+            Tab(icon: Icon(Icons.folder_special_rounded), text: 'Projects'),
+            Tab(icon: Icon(Icons.tune_rounded), text: 'Settings'),
           ],
         ),
       ),
@@ -152,37 +162,19 @@ class _DashboardPageState extends State<DashboardPage>
           _buildSettingsTab(theme),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            heroTag: 'wizard_fab',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const MeasurementWizardPage(),
-                ),
-              );
-            },
-            tooltip: 'Measurement Wizard',
-            child: const Icon(Icons.auto_fix_high_rounded),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton.extended(
-            heroTag: 'camera_fab',
-            onPressed: () {
-              final profile = sl.capabilityProvider.profile;
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CameraMeasurementPage(profile: profile),
-                ),
-              );
-            },
-            icon: const Icon(Icons.camera_alt_rounded),
-            label: const Text('Camera'),
-            tooltip: 'Camera Measurement',
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'camera_scan_fab',
+        onPressed: () {
+          final profile = sl.capabilityProvider.profile;
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CameraMeasurementPage(profile: profile),
+            ),
+          );
+        },
+        icon: const Icon(Icons.camera_alt_rounded),
+        label: const Text('Live Camera Scan'),
+        elevation: 4,
       ),
     );
   }
@@ -201,11 +193,13 @@ class _DashboardPageState extends State<DashboardPage>
               Expanded(
                 flex: 3,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
                   child: Column(
                     children: [
                       _buildAlgorithmBanner(profile),
+                      const SizedBox(height: 12),
                       _buildModeSelector(profile),
+                      const SizedBox(height: 12),
                       _buildFloorPlanToggle(),
                       if (_showFloorPlan) _buildFloorPlanView(),
                     ],
@@ -216,12 +210,12 @@ class _DashboardPageState extends State<DashboardPage>
               Expanded(
                 flex: 2,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
                   child: Column(
                     children: [
                       _buildUnitSelector(),
+                      const SizedBox(height: 12),
                       _buildResultsPanel(),
-                      CapabilityCard(profile: profile),
                     ],
                   ),
                 ),
@@ -231,16 +225,19 @@ class _DashboardPageState extends State<DashboardPage>
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
           child: Column(
             children: [
               _buildAlgorithmBanner(profile),
+              const SizedBox(height: 12),
               _buildUnitSelector(),
+              const SizedBox(height: 12),
               _buildModeSelector(profile),
+              const SizedBox(height: 12),
               _buildFloorPlanToggle(),
               if (_showFloorPlan) _buildFloorPlanView(),
+              const SizedBox(height: 12),
               _buildResultsPanel(),
-              CapabilityCard(profile: profile),
             ],
           ),
         );
@@ -250,31 +247,21 @@ class _DashboardPageState extends State<DashboardPage>
 
   Widget _buildAlgorithmBanner(CapabilityProfile profile) {
     final isLoading = sl.capabilityProvider.isLoading;
-    final algo = sl.measurementProvider.lastResult?.algorithmUsed
-        ?? (isLoading ? null : profile.bestAlgorithm);
+    final algo = sl.measurementProvider.lastResult?.algorithmUsed ??
+        (isLoading ? null : profile.bestAlgorithm);
     final algoName = isLoading
-        ? 'Detecting hardware...'
-        : (algo?.displayName ?? 'Manual Input Fallback');
+        ? 'Detecting Hardware...'
+        : (algo?.displayName ?? 'Manual Fallback Engine');
     final algoColor = algo != null
         ? AppTheme.algorithmColor(algo.name)
         : Theme.of(context).colorScheme.outline;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            algoColor.withValues(alpha: 0.18),
-            algoColor.withValues(alpha: 0.05),
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.6, 1.0],
-        ),
+        color: algoColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: algoColor.withValues(alpha: 0.35)),
+        border: Border.all(color: algoColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -285,11 +272,11 @@ class _DashboardPageState extends State<DashboardPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isLoading ? 'Scanning Sensors' : 'Active Engine',
+                  isLoading ? 'Scanning Sensors' : 'AUTO ENGINE SELECTED',
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.5,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
@@ -297,16 +284,12 @@ class _DashboardPageState extends State<DashboardPage>
                   ),
                 ),
                 const SizedBox(height: 2),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: Text(
-                    algoName,
-                    key: ValueKey(algoName),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: algoColor,
-                    ),
+                Text(
+                  algoName,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: algoColor,
                   ),
                 ),
               ],
@@ -326,10 +309,10 @@ class _DashboardPageState extends State<DashboardPage>
                   const SizedBox(width: 4),
                   Text(
                     sl.measurementProvider.lastResult != null
-                        ? '${sl.measurementProvider.lastResult!.estimatedAccuracyPercentage.toStringAsFixed(0)}%'
+                        ? '${sl.measurementProvider.lastResult!.estimatedAccuracyPercentage.toStringAsFixed(0)}% acc'
                         : '${profile.bestConfidence.toStringAsFixed(0)}% conf',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: algoColor,
                     ),
@@ -345,6 +328,11 @@ class _DashboardPageState extends State<DashboardPage>
   Widget _buildUnitSelector() {
     final theme = Theme.of(context);
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -365,7 +353,7 @@ class _DashboardPageState extends State<DashboardPage>
                 Expanded(
                   child: _buildUnitDropdown<AreaUnit>(
                     label: 'Area',
-                    icon: Icons.square_foot,
+                    icon: Icons.square_foot_rounded,
                     value: sl.measurementProvider.targetAreaUnit,
                     items: AreaUnit.values,
                     displayName: (u) => UnitConverter.areaUnitLabel(u),
@@ -381,7 +369,7 @@ class _DashboardPageState extends State<DashboardPage>
                 Expanded(
                   child: _buildUnitDropdown<DistanceUnit>(
                     label: 'Distance',
-                    icon: Icons.straighten,
+                    icon: Icons.straighten_rounded,
                     value: sl.measurementProvider.targetDistanceUnit,
                     items: DistanceUnit.values,
                     displayName: (u) => UnitConverter.distanceUnitLabel(u),
@@ -425,7 +413,7 @@ class _DashboardPageState extends State<DashboardPage>
               .map((u) => DropdownMenuItem(
                     value: u,
                     child: Text(displayName(u),
-                        style: const TextStyle(fontSize: 14)),
+                        style: const TextStyle(fontSize: 13)),
                   ))
               .toList(),
           onChanged: onChanged,
@@ -435,11 +423,29 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildModeSelector(CapabilityProfile profile) {
+    final theme = Theme.of(context);
+
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'SELECT TARGET OBJECT',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SegmentedButton<int>(
@@ -505,13 +511,18 @@ class _DashboardPageState extends State<DashboardPage>
         if (sl.measurementProvider.lastResult == null) {
           return const SizedBox.shrink();
         }
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Row(
             children: [
               const Icon(Icons.grid_on_rounded, size: 18),
               const SizedBox(width: 8),
-              const Text('Floor Plan View', style: TextStyle(fontSize: 14)),
+              const Text('Floor Plan Blueprint Canvas',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
               const Spacer(),
               Switch.adaptive(
                 value: _showFloorPlan,
@@ -525,9 +536,12 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildFloorPlanView() {
-    return FloorPlanCanvas(
-      shape: sl.measurementProvider.lastShape,
-      distanceUnit: sl.measurementProvider.targetDistanceUnit,
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: FloorPlanCanvas(
+        shape: sl.measurementProvider.lastShape,
+        distanceUnit: sl.measurementProvider.targetDistanceUnit,
+      ),
     );
   }
 
@@ -541,8 +555,11 @@ class _DashboardPageState extends State<DashboardPage>
         return Column(
           children: [
             MeasurementDisplay(result: result),
+            const SizedBox(height: 12),
             _buildMaterialEstimation(),
+            const SizedBox(height: 12),
             _buildExportButtons(),
+            const SizedBox(height: 12),
             _buildNavigationButtons(),
           ],
         );
@@ -564,23 +581,23 @@ class _DashboardPageState extends State<DashboardPage>
 
     final theme = Theme.of(context);
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
       child: ExpansionTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                theme.colorScheme.tertiary.withValues(alpha: 0.15),
-                theme.colorScheme.tertiary.withValues(alpha: 0.05),
-              ],
-            ),
+            color: theme.colorScheme.tertiary.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(Icons.construction_rounded,
               color: theme.colorScheme.tertiary, size: 22),
         ),
         title: const Text(
-          'Material Estimation',
+          'Material Quantity Take-off',
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
@@ -599,8 +616,9 @@ class _DashboardPageState extends State<DashboardPage>
                   children: [
                     Expanded(
                       child: Text(
-                        item.material.name.replaceAll(
-                            RegExp(r'([A-Z])'), r' $1').trim(),
+                        item.material.name
+                            .replaceAll(RegExp(r'([A-Z])'), r' $1')
+                            .trim(),
                         style: const TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w500),
                       ),
@@ -609,10 +627,12 @@ class _DashboardPageState extends State<DashboardPage>
                       '${item.adjustedQuantity.toStringAsFixed(1)} ${item.unit.name}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
-                    if (item.totalCost > 0) ...[                      const SizedBox(width: 8),
+                    if (item.totalCost > 0) ...[
+                      const SizedBox(width: 8),
                       Text(
                         '\$${item.totalCost.toStringAsFixed(0)}',
                         style: TextStyle(
@@ -649,33 +669,29 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildNavigationButtons() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => const MeasurementHistoryPage()),
-              ),
-              icon: const Icon(Icons.history_rounded, size: 18),
-              label: const Text('History'),
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (_) => const MeasurementHistoryPage()),
             ),
+            icon: const Icon(Icons.history_rounded, size: 18),
+            label: const Text('History'),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => const GpsTrackingPage()),
-              ),
-              icon: const Icon(Icons.gps_fixed_rounded, size: 18),
-              label: const Text('GPS Track'),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const GpsTrackingPage()),
             ),
+            icon: const Icon(Icons.gps_fixed_rounded, size: 18),
+            label: const Text('GPS Track'),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -716,7 +732,8 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            _dimensionField(
+                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
             _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
@@ -735,13 +752,17 @@ class _DashboardPageState extends State<DashboardPage>
               final w = double.tryParse(widthCtrl.text) ?? 4.5;
               final h = double.tryParse(heightCtrl.text) ?? 3.0;
               Navigator.of(ctx).pop();
-              _runMeasurement(profile, RoomShape(
-                vertices: [
-                  const Point3D(0, 0), Point3D(l, 0),
-                  Point3D(l, w), Point3D(0, w),
-                ],
-                heightMeters: h,
-              ));
+              _runMeasurement(
+                  profile,
+                  RoomShape(
+                    vertices: [
+                      const Point3D(0, 0),
+                      Point3D(l, 0),
+                      Point3D(l, w),
+                      Point3D(0, w),
+                    ],
+                    heightMeters: h,
+                  ));
             },
             label: const Text('Measure'),
           ),
@@ -766,7 +787,8 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            _dimensionField(
+                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
             _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
           ],
@@ -782,14 +804,18 @@ class _DashboardPageState extends State<DashboardPage>
               final l = double.tryParse(lengthCtrl.text) ?? 6.0;
               final h = double.tryParse(heightCtrl.text) ?? 3.0;
               Navigator.of(ctx).pop();
-              _runMeasurement(profile, WallShape(
-                lengthMeters: l,
-                heightMeters: h,
-                openings: const [
-                  WallOpening(label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
-                  WallOpening(label: 'Window', widthMeters: 1.2, heightMeters: 1.2),
-                ],
-              ));
+              _runMeasurement(
+                  profile,
+                  WallShape(
+                    lengthMeters: l,
+                    heightMeters: h,
+                    openings: const [
+                      WallOpening(
+                          label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
+                      WallOpening(
+                          label: 'Window', widthMeters: 1.2, heightMeters: 1.2),
+                    ],
+                  ));
             },
             label: const Text('Measure'),
           ),
@@ -815,7 +841,8 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            _dimensionField(
+                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
             _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
@@ -834,11 +861,13 @@ class _DashboardPageState extends State<DashboardPage>
               final w = double.tryParse(widthCtrl.text) ?? 1.5;
               final h = double.tryParse(heightCtrl.text) ?? 1.0;
               Navigator.of(ctx).pop();
-              _runMeasurement(profile, CuboidShape(
-                lengthMeters: l,
-                widthMeters: w,
-                heightMeters: h,
-              ));
+              _runMeasurement(
+                  profile,
+                  CuboidShape(
+                    lengthMeters: l,
+                    widthMeters: w,
+                    heightMeters: h,
+                  ));
             },
             label: const Text('Measure'),
           ),
@@ -865,13 +894,15 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            _dimensionField(
+                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
             _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
             const SizedBox(height: 12),
             _dimensionField(floorsCtrl, 'Floors', Icons.layers_rounded),
             const SizedBox(height: 12),
-            _dimensionField(floorHCtrl, 'Floor Height (m)', Icons.height_rounded),
+            _dimensionField(
+                floorHCtrl, 'Floor Height (m)', Icons.height_rounded),
           ],
         ),
         actions: [
@@ -887,14 +918,16 @@ class _DashboardPageState extends State<DashboardPage>
               final floors = int.tryParse(floorsCtrl.text) ?? 3;
               final fh = double.tryParse(floorHCtrl.text) ?? 3.0;
               Navigator.of(ctx).pop();
-              _runMeasurement(profile, BuildingShape(
-                baseFootprint: RectangleShape(
-                  lengthMeters: l,
-                  widthMeters: w,
-                ),
-                numberOfFloors: floors,
-                floorHeightMeters: fh,
-              ));
+              _runMeasurement(
+                  profile,
+                  BuildingShape(
+                    baseFootprint: RectangleShape(
+                      lengthMeters: l,
+                      widthMeters: w,
+                    ),
+                    numberOfFloors: floors,
+                    floorHeightMeters: fh,
+                  ));
             },
             label: const Text('Measure'),
           ),
@@ -903,7 +936,8 @@ class _DashboardPageState extends State<DashboardPage>
     );
   }
 
-  Widget _dimensionField(TextEditingController ctrl, String label, IconData icon) {
+  Widget _dimensionField(
+      TextEditingController ctrl, String label, IconData icon) {
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -977,42 +1011,67 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildExportButtons() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          _exportChip('PDF', Icons.picture_as_pdf_rounded, () {
-            _showExportDialog('PDF Report',
-                'PDF export ready.\nUse share button to save/send.');
-          }),
-          _exportChip('DXF', Icons.architecture_rounded, () {
-            final str = sl.measurementProvider.exportCurrentToDxf();
-            _showExportDialog('AutoCAD DXF', str);
-          }),
-          _exportChip('CSV', Icons.table_chart_rounded, () {
-            final str = sl.measurementProvider.exportHistoryToCsv();
-            _showExportDialog('CSV Schedule', str);
-          }),
-          _exportChip('SVG', Icons.image_rounded, () {
-            _showExportDialog('SVG', 'SVG floor plan export ready.');
-          }),
-          _exportChip('GeoJSON', Icons.public_rounded, () {
-            final str = sl.measurementProvider.exportPlotToGeoJson();
-            _showExportDialog(
-                'GeoJSON', str.isNotEmpty ? str : 'Select Land mode first');
-          }),
-          _exportChip('KML', Icons.map_rounded, () {
-            _showExportDialog('KML', 'KML export ready for Google Earth.');
-          }),
-          _exportChip('JSON', Icons.data_object_rounded, () {
-            final result = sl.measurementProvider.lastResult;
-            if (result != null) {
-              _showExportDialog('JSON', result.toJson().toString());
-            }
-          }),
-        ],
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'EXPORT REPORTS & CAD',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _exportChip('PDF', Icons.picture_as_pdf_rounded, () {
+                  _showExportDialog('PDF Report',
+                      'PDF export ready.\nUse share button to save/send.');
+                }),
+                _exportChip('DXF', Icons.architecture_rounded, () {
+                  final str = sl.measurementProvider.exportCurrentToDxf();
+                  _showExportDialog('AutoCAD DXF', str);
+                }),
+                _exportChip('CSV', Icons.table_chart_rounded, () {
+                  final str = sl.measurementProvider.exportHistoryToCsv();
+                  _showExportDialog('CSV Schedule', str);
+                }),
+                _exportChip('SVG', Icons.image_rounded, () {
+                  _showExportDialog('SVG', 'SVG floor plan export ready.');
+                }),
+                _exportChip('GeoJSON', Icons.public_rounded, () {
+                  final str = sl.measurementProvider.exportPlotToGeoJson();
+                  _showExportDialog('GeoJSON',
+                      str.isNotEmpty ? str : 'Select Land mode first');
+                }),
+                _exportChip('KML', Icons.map_rounded, () {
+                  _showExportDialog('KML', 'KML export ready for Google Earth.');
+                }),
+                _exportChip('JSON', Icons.data_object_rounded, () {
+                  final result = sl.measurementProvider.lastResult;
+                  if (result != null) {
+                    _showExportDialog('JSON', result.toJson().toString());
+                  }
+                }),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1091,6 +1150,12 @@ class _DashboardPageState extends State<DashboardPage>
                           label:
                               'Project ${p.name}, ${p.measurementCount} measurements',
                           child: Card(
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                  color: theme.colorScheme.outlineVariant),
+                            ),
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
@@ -1193,9 +1258,14 @@ class _DashboardPageState extends State<DashboardPage>
   // ━━━ Settings Tab ━━━
   Widget _buildSettingsTab(ThemeData theme) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
       children: [
         Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: theme.colorScheme.outlineVariant),
+          ),
           child: Column(
             children: [
               ListTile(
@@ -1217,8 +1287,13 @@ class _DashboardPageState extends State<DashboardPage>
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: theme.colorScheme.outlineVariant),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1246,40 +1321,20 @@ class _DashboardPageState extends State<DashboardPage>
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('GeoMeasure v${AppConfig.appVersion}',
-                    key: const Key('app_version_text'),
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary)),
-                const SizedBox(height: 4),
-                Text(
-                  'Capability-Aware Spatial & Land Measurement Engine',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: theme.colorScheme.outlineVariant),
           ),
-        ),
-        const SizedBox(height: 8),
-        // ── Data Management ──
-        Card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text(
-                  'DATA MANAGEMENT',
+                  'DATA MANAGEMENT & HARDWARE',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -1296,7 +1351,8 @@ class _DashboardPageState extends State<DashboardPage>
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () async {
                   final backup = await BackupService.createBackup();
-                  final count = (backup['data'] as Map).values
+                  final count = (backup['data'] as Map)
+                      .values
                       .whereType<Map>()
                       .fold<int>(0, (s, m) => s + m.length);
                   if (!mounted) return;
@@ -1336,7 +1392,7 @@ class _DashboardPageState extends State<DashboardPage>
                 leading: Icon(Icons.sensors_rounded,
                     color: theme.colorScheme.primary),
                 title: const Text('Hardware Diagnostics'),
-                subtitle: const Text('View all detected sensors'),
+                subtitle: const Text('View detected sensors & AI accelerators'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {
                   final profile = sl.capabilityProvider.profile;
@@ -1354,7 +1410,8 @@ class _DashboardPageState extends State<DashboardPage>
                         children: [
                           Center(
                             child: Container(
-                              width: 40, height: 4,
+                              width: 40,
+                              height: 4,
                               margin: const EdgeInsets.only(bottom: 16),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.onSurface
@@ -1367,18 +1424,18 @@ class _DashboardPageState extends State<DashboardPage>
                               style: theme.textTheme.titleLarge),
                           const SizedBox(height: 8),
                           ...profile.toJson().entries.map(
-                            (e) => ListTile(
-                              dense: true,
-                              title: Text(e.key),
-                              trailing: Text(
-                                e.value.toString(),
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
+                                (e) => ListTile(
+                                  dense: true,
+                                  title: Text(e.key),
+                                  trailing: Text(
+                                    e.value.toString(),
+                                    style: TextStyle(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -1386,6 +1443,35 @@ class _DashboardPageState extends State<DashboardPage>
                 },
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('GeoMeasure v${AppConfig.appVersion}',
+                    key: const Key('app_version_text'),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary)),
+                const SizedBox(height: 4),
+                Text(
+                  'Universal AI Spatial & Land Measurement Engine',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
