@@ -139,6 +139,43 @@ class CapabilityProfile {
     return MeasurementAlgorithm.manual;
   }
 
+  /// Estimated confidence percentage (0-100) for each available engine.
+  Map<MeasurementAlgorithm, double> get engineConfidence {
+    final map = <MeasurementAlgorithm, double>{};
+
+    if (hasLidar) {
+      map[MeasurementAlgorithm.lidar] = cameraCalibrated ? 98.0 : 95.0;
+    }
+    if (hasDepthSensor) {
+      map[MeasurementAlgorithm.depthSensor] = cameraCalibrated ? 92.0 : 85.0;
+    }
+    if (hasArCore || hasArKit) {
+      var conf = 80.0;
+      if (hasGyroscope && hasAccelerometer) conf += 5.0;
+      if (ramMb >= 4096) conf += 3.0;
+      map[MeasurementAlgorithm.arCoreArKit] = conf;
+    }
+    if (hasCamera && hasGyroscope && hasAccelerometer) {
+      var conf = 70.0;
+      if (hasBarometer) conf += 3.0;
+      if (ramMb >= 4096) conf += 5.0;
+      if (hasAiAccelerator) conf += 5.0;
+      map[MeasurementAlgorithm.visualSlam] = conf;
+    }
+    if (hasGps && hasCompass) {
+      var conf = 60.0;
+      if (hasBarometer) conf += 5.0;
+      if (sensorAccuracy == HardwareAccuracy.high) conf += 10.0;
+      map[MeasurementAlgorithm.gpsImu] = conf;
+    }
+    map[MeasurementAlgorithm.manual] = 50.0;
+
+    return map;
+  }
+
+  /// Confidence percentage for the best available engine.
+  double get bestConfidence => engineConfidence[bestAlgorithm] ?? 50.0;
+
   /// Count of detected sensors.
   int get sensorCount {
     int count = 0;

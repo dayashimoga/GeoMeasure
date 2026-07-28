@@ -7,6 +7,7 @@ import '../../../measurement_engine/domain/entities/measurement_unit.dart';
 ///
 /// Uses CustomPainter for high-performance hardware-accelerated
 /// rendering of shapes, dimensions, and annotations.
+/// When [editable] is true, vertices can be dragged and snapped to grid.
 class FloorPlanCanvas extends StatefulWidget {
   final SpatialShape? shape;
   final List<Point3D> vertices;
@@ -14,6 +15,9 @@ class FloorPlanCanvas extends StatefulWidget {
   final bool showDimensions;
   final bool showNorthArrow;
   final DistanceUnit distanceUnit;
+  final bool editable;
+  final double snapGridMeters;
+  final ValueChanged<List<Point3D>>? onVerticesChanged;
 
   const FloorPlanCanvas({
     super.key,
@@ -23,6 +27,9 @@ class FloorPlanCanvas extends StatefulWidget {
     this.showDimensions = true,
     this.showNorthArrow = true,
     this.distanceUnit = DistanceUnit.meters,
+    this.editable = false,
+    this.snapGridMeters = 0.1,
+    this.onVerticesChanged,
   });
 
   @override
@@ -34,6 +41,8 @@ class _FloorPlanCanvasState extends State<FloorPlanCanvas>
   double _scale = 1.0;
   Offset _offset = Offset.zero;
   late AnimationController _animController;
+  int? _dragIndex;
+  late List<Point3D> _editableVertices;
 
   @override
   void initState() {
@@ -42,12 +51,91 @@ class _FloorPlanCanvasState extends State<FloorPlanCanvas>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+    _editableVertices = List.of(widget.vertices);
+  }
+
+  @override
+  void didUpdateWidget(FloorPlanCanvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.vertices != oldWidget.vertices) {
+      _editableVertices = List.of(widget.vertices);
+    }
   }
 
   @override
   void dispose() {
     _animController.dispose();
     super.dispose();
+  }
+
+  /// Pixels per meter constant (must match painter).
+  static const double _ppm = 50.0;
+
+  /// Convert screen position to world coordinates.
+  Offset _screenToWorld(Offset screenPos, Size canvasSize) {
+    final cx = canvasSize.width / 2 + _offset.dx;
+    final cy = canvasSize.height / 2 + _offset.dy;
+    return Offset(
+      (screenPos.dx - cx) / _scale,
+      (screenPos.dy - cy) / _scale,
+    );
+  }
+
+  /// Find the nearest vertex within touch radius.
+  int? _hitTestVertex(Offset worldPos) {
+    const hitRadius = 15.0; // pixels
+    for (int i = 0; i < _editableVertices.length; i++) {
+      final vx = _editableVertices[i].x * _ppm;
+      final vy = -_editableVertices[i].y * _ppm;
+      final dist = (Offset(vx, vy) - worldPos).distance;
+      if (dist < hitRadius / _scale) return i;
+    }
+    return null;
+  }
+
+  /// Snap a value to the nearest grid increment.
+  double _snap(double value) {
+    if (!widget.editable) return value;
+    final grid = widget.snapGridMeters;
+    return (value / grid).round() * grid;
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    if (!widget.editable) return;
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final local = box.globalToLocal(details.globalPosition);
+    final world = _screenToWorld(local, box.size);
+    _dragIndex = _hitTestVertex(world);
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (!widget.editable || _dragIndex == null) {
+      // Pan canvas when not dragging a vertex
+      setState(() => _offset += details.delta);
+      return;
+    }
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final local = box.globalToLocal(details.globalPosition);
+    final world = _screenToWorld(local, box.size);
+
+    setState(() {
+      final snappedX = _snap(world.dx / _ppm);
+      final snappedY = _snap(-world.dy / _ppm);
+      _editableVertices[_dragIndex!] = Point3D(
+        snappedX,
+        snappedY,
+        _editableVertices[_dragIndex!].z,
+      );
+    });
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (_dragIndex != null) {
+      widget.onVerticesChanged?.call(List.unmodifiable(_editableVertices));
+      _dragIndex = null;
+    }
   }
 
   @override
@@ -60,26 +148,36 @@ class _FloorPlanCanvasState extends State<FloorPlanCanvas>
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: widget.editable
+              ? theme.colorScheme.primary.withValues(alpha: 0.5)
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          width: widget.editable ? 2 : 1,
         ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: GestureDetector(
           onScaleStart: (details) {},
-          onScaleUpdate: (details) {
-            setState(() {
-              _scale = (_scale * details.scale).clamp(0.3, 5.0);
-              _offset += details.focalPointDelta;
-            });
-          },
+          onScaleUpdate: widget.editable
+              ? null
+              : (details) {
+                  setState(() {
+                    _scale = (_scale * details.scale).clamp(0.3, 5.0);
+                    _offset += details.focalPointDelta;
+                  });
+                },
+          onPanStart: widget.editable ? _onPanStart : null,
+          onPanUpdate: widget.editable ? _onPanUpdate : null,
+          onPanEnd: widget.editable ? _onPanEnd : null,
           child: SizedBox(
             height: 300,
             width: double.infinity,
             child: CustomPaint(
               painter: _FloorPlanPainter(
                 shape: widget.shape,
-                vertices: widget.vertices,
+                vertices: widget.editable
+                    ? _editableVertices
+                    : widget.vertices,
                 scale: _scale,
                 offset: _offset,
                 showGrid: widget.showGrid,
@@ -92,6 +190,8 @@ class _FloorPlanCanvasState extends State<FloorPlanCanvas>
                     theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                 textColor: theme.colorScheme.onSurface,
                 accentColor: theme.colorScheme.secondary,
+                editMode: widget.editable,
+                selectedVertexIndex: _dragIndex,
               ),
               size: Size.infinite,
             ),
@@ -116,6 +216,8 @@ class _FloorPlanPainter extends CustomPainter {
   final Color gridColor;
   final Color textColor;
   final Color accentColor;
+  final bool editMode;
+  final int? selectedVertexIndex;
 
   _FloorPlanPainter({
     required this.shape,
@@ -131,6 +233,8 @@ class _FloorPlanPainter extends CustomPainter {
     required this.gridColor,
     required this.textColor,
     required this.accentColor,
+    this.editMode = false,
+    this.selectedVertexIndex,
   });
 
   static const double _ppm = 50.0; // pixels per meter
@@ -405,13 +509,48 @@ class _FloorPlanPainter extends CustomPainter {
 
   void _drawVertices(Canvas canvas, List<Point3D> verts) {
     _drawPolygon(canvas, verts);
+    // In edit mode, draw larger interactive handles
+    if (editMode) {
+      for (int i = 0; i < verts.length; i++) {
+        final pos = Offset(verts[i].x * _ppm, -verts[i].y * _ppm);
+        final isSelected = i == selectedVertexIndex;
+        final radius = isSelected ? 10.0 : 7.0;
+
+        // Outer glow for selected
+        if (isSelected) {
+          canvas.drawCircle(
+            pos,
+            radius + 4,
+            Paint()
+              ..color = accentColor.withValues(alpha: 0.3)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+          );
+        }
+        // Fill
+        canvas.drawCircle(
+          pos,
+          radius,
+          Paint()..color = isSelected ? accentColor : surfaceColor,
+        );
+        // Border
+        canvas.drawCircle(
+          pos,
+          radius,
+          Paint()
+            ..color = isSelected ? accentColor : primaryColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = isSelected ? 3 : 2,
+        );
+      }
+    }
   }
 
   void _drawVertexDot(Canvas canvas, Offset position) {
-    canvas.drawCircle(position, 5, Paint()..color = primaryColor);
+    final radius = editMode ? 7.0 : 5.0;
+    canvas.drawCircle(position, radius, Paint()..color = primaryColor);
     canvas.drawCircle(
       position,
-      5,
+      radius,
       Paint()
         ..color = surfaceColor
         ..style = PaintingStyle.stroke
