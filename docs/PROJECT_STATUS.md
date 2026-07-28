@@ -1,6 +1,6 @@
 # Project Status
 
-**Version**: 2.6.0+14 | **Date**: 2026-07-28 | **Tests**: 313/313 passing
+**Version**: 2.7.0+16 | **Date**: 2026-07-28 | **Tests**: 407/407 passing
 
 ## Build Status
 
@@ -10,7 +10,7 @@
 | Android | ✅ CI builds | `flutter build apk` |
 | iOS | ⚠️ Config ready (requires macOS + Xcode) | `flutter build ios` |
 | Analysis | ✅ 0 errors, 0 warnings | `flutter analyze` |
-| Tests | ✅ 313/313 | `flutter test` |
+| Tests | ✅ 407/407 | `flutter test` |
 | Docker | ✅ All services functional | `docker compose run app-ci` |
 
 ## Overall Completion: ~85%
