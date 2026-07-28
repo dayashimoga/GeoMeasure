@@ -39,7 +39,7 @@ void main() {
 
     test('surface area = 2πr² + 2πrh', () {
       const cyl = CylinderShape(radiusMeters: 2, heightMeters: 5);
-      final expected = 2 * pi * 4 + 2 * pi * 2 * 5;
+      const expected = 2 * pi * 4 + 2 * pi * 2 * 5;
       expect(cyl.calculateSurfaceArea(), closeTo(expected, 0.01));
     });
 
@@ -111,7 +111,7 @@ void main() {
     test('volume formula', () {
       const f = FrustumShape(
           topRadiusMeters: 2, bottomRadiusMeters: 4, heightMeters: 6);
-      final expected = (pi * 6 / 3) * (16 + 4 + 8); // π*2*(16+4+8)
+      const expected = (pi * 6 / 3) * (16 + 4 + 8); // π*2*(16+4+8)
       expect(f.calculateVolumeInCubicMeters(), closeTo(expected, 0.01));
     });
 
@@ -224,7 +224,7 @@ void main() {
         innerRadiusMeters: 0.4,
         lengthMeters: 10,
       );
-      final expected = pi * (0.25 - 0.16);
+      const expected = pi * (0.25 - 0.16);
       expect(pipe.calculateAreaInSquareMeters(), closeTo(expected, 0.001));
     });
 
@@ -546,7 +546,7 @@ void main() {
     });
 
     test('serialization round-trip', () {
-      final analysis = BuildingAnalysis(
+      const analysis = BuildingAnalysis(
         lengthMeters: 20,
         widthMeters: 15,
         heightMeters: 12,

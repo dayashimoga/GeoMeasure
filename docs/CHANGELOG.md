@@ -2,6 +2,36 @@
 
 All notable changes to GeoMeasure are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.5.0] - 2026-07-28
+
+### Added
+- **PolygonEditor** — vertex add/delete/move, edge split, rotate, scale, snap-to-grid, undo/redo history
+- **ProjectVersionHistory** — snapshot recording, version diff comparison, JSON serialization
+- **BackupService** — full Hive JSON backup/restore with versioning
+- **Settings tab** — Create Backup, Restore, Hardware Diagnostics bottom sheet
+- **Dashboard confidence badge** — shows engine confidence % instead of sensor count
+- 56 new tests (294 total) covering polygon editing, version history, failure/edge cases
+
+## [2.4.0] - 2026-07-28
+
+### Added
+- **Onboarding flow** — 4-slide first-launch walkthrough (Detect → Measure → Camera → Export) with Hive persistence
+- **Engine confidence scoring** — per-algorithm confidence percentages (50-98%) based on hardware sensors, RAM, calibration
+- **Slope & elevation calculations** — `calculateSlopeDegrees`, `calculateSlopePercent`, `calculateElevationDifference`, `calculateElevationGain`, `calculateBearing`
+- **Report templates** — `InspectionReport` (16-item building checklist), `PropertyReport`, `InventoryReport` with category aggregation
+- **PNG/JPEG image export** — `ImageExporter` captures floor plan canvas via `RenderRepaintBoundary`
+- **Interactive floor plan editing** — drag vertices with snap-to-grid (0.1m), selected vertex glow, `onVerticesChanged` callback
+- **Camera measurement page** — capture photo → add dimension annotations → calculate measurement
+- **Camera FAB** on dashboard for quick access to camera workflow
+- **Capability caching** — cache-first strategy with background hardware refresh, `forceRefresh` for manual rescan
+- **Material estimation panel** — expandable card with concrete/cement/brick/steel/paint/tiles, wastage-adjusted costs
+
+### Fixed
+- `estimateForRoom`/`estimateForBuilding` — positional argument error (named param fix)
+- `MeasurementAlgorithm.displayName` — missing import for extension method
+- Platform channel mismatch — `geomeasure/capability_detection` + `detectCapabilities` method name
+- `CameraProvider.selectedIndex` — derived from `selectedPhoto` via `indexWhere`
+
 ## [2.2.0] - 2026-07-26
 
 ### Added

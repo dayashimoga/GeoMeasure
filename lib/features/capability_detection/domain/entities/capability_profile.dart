@@ -1,4 +1,5 @@
 import 'sensor_type.dart';
+import '../../../measurement_engine/domain/entities/measurement_algorithm.dart';
 
 class CapabilityProfile {
   final bool hasLidar;
@@ -124,4 +125,92 @@ class CapabilityProfile {
         'networkType': networkType.name,
         'permissionsGranted': permissionsGranted,
       };
+
+  /// Auto-select the best measurement engine based on detected hardware.
+  /// Priority: LiDAR → Depth → AR → Visual SLAM → GPS → Manual.
+  MeasurementAlgorithm get bestAlgorithm {
+    if (hasLidar) return MeasurementAlgorithm.lidar;
+    if (hasDepthSensor) return MeasurementAlgorithm.depthSensor;
+    if (hasArCore || hasArKit) return MeasurementAlgorithm.arCoreArKit;
+    if (hasCamera && hasGyroscope && hasAccelerometer) {
+      return MeasurementAlgorithm.visualSlam;
+    }
+    if (hasGps && hasCompass) return MeasurementAlgorithm.gpsImu;
+    return MeasurementAlgorithm.manual;
+  }
+
+  /// Estimated confidence percentage (0-100) for each available engine.
+  Map<MeasurementAlgorithm, double> get engineConfidence {
+    final map = <MeasurementAlgorithm, double>{};
+
+    if (hasLidar) {
+      map[MeasurementAlgorithm.lidar] = cameraCalibrated ? 98.0 : 95.0;
+    }
+    if (hasDepthSensor) {
+      map[MeasurementAlgorithm.depthSensor] = cameraCalibrated ? 92.0 : 85.0;
+    }
+    if (hasArCore || hasArKit) {
+      var conf = 80.0;
+      if (hasGyroscope && hasAccelerometer) conf += 5.0;
+      if (ramMb >= 4096) conf += 3.0;
+      map[MeasurementAlgorithm.arCoreArKit] = conf;
+    }
+    if (hasCamera && hasGyroscope && hasAccelerometer) {
+      var conf = 70.0;
+      if (hasBarometer) conf += 3.0;
+      if (ramMb >= 4096) conf += 5.0;
+      if (hasAiAccelerator) conf += 5.0;
+      map[MeasurementAlgorithm.visualSlam] = conf;
+    }
+    if (hasGps && hasCompass) {
+      var conf = 60.0;
+      if (hasBarometer) conf += 5.0;
+      if (sensorAccuracy == HardwareAccuracy.high) conf += 10.0;
+      map[MeasurementAlgorithm.gpsImu] = conf;
+    }
+    map[MeasurementAlgorithm.manual] = 50.0;
+
+    return map;
+  }
+
+  /// Confidence percentage for the best available engine.
+  double get bestConfidence => engineConfidence[bestAlgorithm] ?? 50.0;
+
+  /// Count of detected sensors.
+  int get sensorCount {
+    int count = 0;
+    if (hasLidar) count++;
+    if (hasDepthSensor) count++;
+    if (hasArCore) count++;
+    if (hasArKit) count++;
+    if (hasCamera) count++;
+    if (hasGps) count++;
+    if (hasCompass) count++;
+    if (hasGyroscope) count++;
+    if (hasAccelerometer) count++;
+    if (hasBarometer) count++;
+    if (hasBluetooth) count++;
+    if (hasNfc) count++;
+    if (hasAiAccelerator) count++;
+    return count;
+  }
+
+  /// Names of detected sensors for UI display.
+  List<String> get detectedSensorNames {
+    final sensors = <String>[];
+    if (hasLidar) sensors.add('LiDAR');
+    if (hasDepthSensor) sensors.add('Depth');
+    if (hasArCore) sensors.add('ARCore');
+    if (hasArKit) sensors.add('ARKit');
+    if (hasCamera) sensors.add('Camera');
+    if (hasGps) sensors.add('GPS');
+    if (hasCompass) sensors.add('Compass');
+    if (hasGyroscope) sensors.add('Gyro');
+    if (hasAccelerometer) sensors.add('Accel');
+    if (hasBarometer) sensors.add('Baro');
+    if (hasBluetooth) sensors.add('BT');
+    if (hasNfc) sensors.add('NFC');
+    if (hasAiAccelerator) sensors.add('AI');
+    return sensors;
+  }
 }

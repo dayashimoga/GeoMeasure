@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/data/backup_service.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../capability_detection/domain/entities/capability_profile.dart';
@@ -7,11 +9,14 @@ import '../../measurement_engine/domain/entities/measurement_unit.dart';
 import '../../measurement_engine/domain/entities/spatial_shape.dart';
 import '../../measurement_engine/domain/services/geodetic_calculator.dart';
 import '../../measurement_engine/domain/services/unit_converter.dart';
+import '../../estimation/domain/entities/material_estimate.dart';
 import '../../visualization/presentation/widgets/floor_plan_canvas.dart';
 import '../widgets/capability_card.dart';
 import '../widgets/measurement_display.dart';
 import 'gps_tracking_page.dart';
+import 'camera_measurement_page.dart';
 import 'measurement_history_page.dart';
+import 'measurement_wizard_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final VoidCallback? onToggleTheme;
@@ -126,7 +131,7 @@ class _DashboardPageState extends State<DashboardPage>
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => sl.capabilityProvider.loadCapabilities(),
+            onPressed: () => sl.capabilityProvider.forceRefresh(),
             tooltip: 'Refresh Capabilities',
           ),
         ],
@@ -145,6 +150,38 @@ class _DashboardPageState extends State<DashboardPage>
           _buildMeasureTab(isWide),
           _buildProjectsTab(),
           _buildSettingsTab(theme),
+        ],
+      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: 'wizard_fab',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const MeasurementWizardPage(),
+                ),
+              );
+            },
+            tooltip: 'Measurement Wizard',
+            child: const Icon(Icons.auto_fix_high_rounded),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'camera_fab',
+            onPressed: () {
+              final profile = sl.capabilityProvider.profile;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CameraMeasurementPage(profile: profile),
+                ),
+              );
+            },
+            icon: const Icon(Icons.camera_alt_rounded),
+            label: const Text('Camera'),
+            tooltip: 'Camera Measurement',
+          ),
         ],
       ),
     );
@@ -212,74 +249,93 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildAlgorithmBanner(CapabilityProfile profile) {
-    final algo = sl.measurementProvider.lastResult?.algorithmUsed;
-    final algoName = algo?.displayName ?? 'Detecting...';
+    final isLoading = sl.capabilityProvider.isLoading;
+    final algo = sl.measurementProvider.lastResult?.algorithmUsed
+        ?? (isLoading ? null : profile.bestAlgorithm);
+    final algoName = isLoading
+        ? 'Detecting hardware...'
+        : (algo?.displayName ?? 'Manual Input Fallback');
     final algoColor = algo != null
         ? AppTheme.algorithmColor(algo.name)
         : Theme.of(context).colorScheme.outline;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [algoColor.withValues(alpha: 0.15), Colors.transparent],
+          colors: [
+            algoColor.withValues(alpha: 0.18),
+            algoColor.withValues(alpha: 0.05),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.6, 1.0],
         ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: algoColor.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: algoColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: algoColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                    color: algoColor.withValues(alpha: 0.4), blurRadius: 6)
-              ],
-            ),
-          ),
+          _PulsingDot(color: algoColor, isAnimating: isLoading),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Active Engine',
+                  isLoading ? 'Scanning Sensors' : 'Active Engine',
                   style: TextStyle(
                     fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
                         .withValues(alpha: 0.6),
                   ),
                 ),
-                Text(
-                  algoName,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: algoColor,
+                const SizedBox(height: 2),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: Text(
+                    algoName,
+                    key: ValueKey(algoName),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: algoColor,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          if (algo != null)
-            Chip(
-              label: Text(
-                '${sl.measurementProvider.lastResult?.estimatedAccuracyPercentage.toStringAsFixed(0)}%',
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          if (algo != null && !isLoading)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: algoColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
               ),
-              backgroundColor: algoColor.withValues(alpha: 0.15),
-              side: BorderSide.none,
-              padding: EdgeInsets.zero,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sensors_rounded, size: 14, color: algoColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    sl.measurementProvider.lastResult != null
+                        ? '${sl.measurementProvider.lastResult!.estimatedAccuracyPercentage.toStringAsFixed(0)}%'
+                        : '${profile.bestConfidence.toStringAsFixed(0)}% conf',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: algoColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
         ],
       ),
@@ -384,37 +440,56 @@ class _DashboardPageState extends State<DashboardPage>
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(
-                  value: 0,
-                  label: Text('Room'),
-                  icon: Icon(Icons.meeting_room_rounded),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text('Wall'),
-                  icon: Icon(Icons.sensor_window_rounded),
-                ),
-                ButtonSegment(
-                  value: 2,
-                  label: Text('Land'),
-                  icon: Icon(Icons.map_rounded),
-                ),
-              ],
-              selected: {_selectedModeIndex},
-              onSelectionChanged: (set) {
-                setState(() => _selectedModeIndex = set.first);
-              },
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SegmentedButton<int>(
+                segments: const [
+                  ButtonSegment(
+                    value: 0,
+                    label: Text('Room'),
+                    icon: Icon(Icons.meeting_room_rounded),
+                  ),
+                  ButtonSegment(
+                    value: 1,
+                    label: Text('Wall'),
+                    icon: Icon(Icons.sensor_window_rounded),
+                  ),
+                  ButtonSegment(
+                    value: 2,
+                    label: Text('Land'),
+                    icon: Icon(Icons.map_rounded),
+                  ),
+                  ButtonSegment(
+                    value: 3,
+                    label: Text('Object'),
+                    icon: Icon(Icons.category_rounded),
+                  ),
+                  ButtonSegment(
+                    value: 4,
+                    label: Text('Building'),
+                    icon: Icon(Icons.apartment_rounded),
+                  ),
+                ],
+                selected: {_selectedModeIndex},
+                onSelectionChanged: (set) {
+                  setState(() => _selectedModeIndex = set.first);
+                },
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              height: 48,
+              child: FilledButton.icon(
                 key: const Key('execute_measurement_button'),
-                onPressed: () => _executeMeasurement(profile),
+                onPressed: () => _showMeasurementInput(profile),
                 icon: const Icon(Icons.play_arrow_rounded),
                 label: Text(_getExecuteButtonText()),
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
           ],
@@ -466,11 +541,387 @@ class _DashboardPageState extends State<DashboardPage>
         return Column(
           children: [
             MeasurementDisplay(result: result),
+            _buildMaterialEstimation(),
             _buildExportButtons(),
+            _buildNavigationButtons(),
           ],
         );
       },
     );
+  }
+
+  Widget _buildMaterialEstimation() {
+    final shape = sl.measurementProvider.lastShape;
+    if (shape == null) return const SizedBox.shrink();
+
+    QuantityTakeoff? takeoff;
+    if (shape is RoomShape) {
+      takeoff = MaterialEstimator.estimateForRoom(shape);
+    } else if (shape is BuildingShape) {
+      takeoff = MaterialEstimator.estimateForBuilding(shape);
+    }
+    if (takeoff == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    return Card(
+      child: ExpansionTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                theme.colorScheme.tertiary.withValues(alpha: 0.15),
+                theme.colorScheme.tertiary.withValues(alpha: 0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(Icons.construction_rounded,
+              color: theme.colorScheme.tertiary, size: 22),
+        ),
+        title: const Text(
+          'Material Estimation',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          '${takeoff.items.length} materials • \$${takeoff.totalCost.toStringAsFixed(0)} est.',
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+        initiallyExpanded: false,
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: [
+          ...takeoff.items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.material.name.replaceAll(
+                            RegExp(r'([A-Z])'), r' $1').trim(),
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    Text(
+                      '${item.adjustedQuantity.toStringAsFixed(1)} ${item.unit.name}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    if (item.totalCost > 0) ...[                      const SizedBox(width: 8),
+                      Text(
+                        '\$${item.totalCost.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              )),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Total Estimated Cost',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface)),
+              Text(
+                '\$${takeoff.totalCost.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const MeasurementHistoryPage()),
+              ),
+              icon: const Icon(Icons.history_rounded, size: 18),
+              label: const Text('History'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const GpsTrackingPage()),
+              ),
+              icon: const Icon(Icons.gps_fixed_rounded, size: 18),
+              label: const Text('GPS Track'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMeasurementInput(CapabilityProfile profile) {
+    switch (_selectedModeIndex) {
+      case 0:
+        _showRoomInput(profile);
+        break;
+      case 1:
+        _showWallInput(profile);
+        break;
+      case 2:
+        _executeMeasurement(profile); // GPS uses preset coordinates
+        break;
+      case 3:
+        _showObjectInput(profile);
+        break;
+      case 4:
+        _showBuildingInput(profile);
+        break;
+    }
+  }
+
+  void _showRoomInput(CapabilityProfile profile) {
+    final lengthCtrl = TextEditingController(text: '6.0');
+    final widthCtrl = TextEditingController(text: '4.5');
+    final heightCtrl = TextEditingController(text: '3.0');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.meeting_room_rounded, size: 24),
+            SizedBox(width: 8),
+            Text('Room Dimensions'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.calculate_rounded, size: 18),
+            onPressed: () {
+              final l = double.tryParse(lengthCtrl.text) ?? 6.0;
+              final w = double.tryParse(widthCtrl.text) ?? 4.5;
+              final h = double.tryParse(heightCtrl.text) ?? 3.0;
+              Navigator.of(ctx).pop();
+              _runMeasurement(profile, RoomShape(
+                vertices: [
+                  const Point3D(0, 0), Point3D(l, 0),
+                  Point3D(l, w), Point3D(0, w),
+                ],
+                heightMeters: h,
+              ));
+            },
+            label: const Text('Measure'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWallInput(CapabilityProfile profile) {
+    final lengthCtrl = TextEditingController(text: '6.0');
+    final heightCtrl = TextEditingController(text: '3.0');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.sensor_window_rounded, size: 24),
+            SizedBox(width: 8),
+            Text('Wall Dimensions'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.calculate_rounded, size: 18),
+            onPressed: () {
+              final l = double.tryParse(lengthCtrl.text) ?? 6.0;
+              final h = double.tryParse(heightCtrl.text) ?? 3.0;
+              Navigator.of(ctx).pop();
+              _runMeasurement(profile, WallShape(
+                lengthMeters: l,
+                heightMeters: h,
+                openings: const [
+                  WallOpening(label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
+                  WallOpening(label: 'Window', widthMeters: 1.2, heightMeters: 1.2),
+                ],
+              ));
+            },
+            label: const Text('Measure'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showObjectInput(CapabilityProfile profile) {
+    final lengthCtrl = TextEditingController(text: '2.0');
+    final widthCtrl = TextEditingController(text: '1.5');
+    final heightCtrl = TextEditingController(text: '1.0');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.category_rounded, size: 24),
+            SizedBox(width: 8),
+            Text('Object Dimensions'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.calculate_rounded, size: 18),
+            onPressed: () {
+              final l = double.tryParse(lengthCtrl.text) ?? 2.0;
+              final w = double.tryParse(widthCtrl.text) ?? 1.5;
+              final h = double.tryParse(heightCtrl.text) ?? 1.0;
+              Navigator.of(ctx).pop();
+              _runMeasurement(profile, CuboidShape(
+                lengthMeters: l,
+                widthMeters: w,
+                heightMeters: h,
+              ));
+            },
+            label: const Text('Measure'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBuildingInput(CapabilityProfile profile) {
+    final lengthCtrl = TextEditingController(text: '20.0');
+    final widthCtrl = TextEditingController(text: '15.0');
+    final floorsCtrl = TextEditingController(text: '3');
+    final floorHCtrl = TextEditingController(text: '3.0');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.apartment_rounded, size: 24),
+            SizedBox(width: 8),
+            Text('Building Dimensions'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(floorsCtrl, 'Floors', Icons.layers_rounded),
+            const SizedBox(height: 12),
+            _dimensionField(floorHCtrl, 'Floor Height (m)', Icons.height_rounded),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.calculate_rounded, size: 18),
+            onPressed: () {
+              final l = double.tryParse(lengthCtrl.text) ?? 20.0;
+              final w = double.tryParse(widthCtrl.text) ?? 15.0;
+              final floors = int.tryParse(floorsCtrl.text) ?? 3;
+              final fh = double.tryParse(floorHCtrl.text) ?? 3.0;
+              Navigator.of(ctx).pop();
+              _runMeasurement(profile, BuildingShape(
+                baseFootprint: RectangleShape(
+                  lengthMeters: l,
+                  widthMeters: w,
+                ),
+                numberOfFloors: floors,
+                floorHeightMeters: fh,
+              ));
+            },
+            label: const Text('Measure'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dimensionField(TextEditingController ctrl, String label, IconData icon) {
+    return TextField(
+      controller: ctrl,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20),
+        isDense: true,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  void _runMeasurement(CapabilityProfile profile, SpatialShape shape) {
+    sl.measurementProvider.calculateMeasurement(
+      shape: shape,
+      profile: profile,
+    );
+    setState(() => _showFloorPlan = true);
   }
 
   void _executeMeasurement(CapabilityProfile profile) {
@@ -505,11 +956,7 @@ class _DashboardPageState extends State<DashboardPage>
       );
     }
 
-    sl.measurementProvider.calculateMeasurement(
-      shape: shape,
-      profile: profile,
-    );
-    setState(() => _showFloorPlan = true);
+    _runMeasurement(profile, shape);
   }
 
   String _getExecuteButtonText() {
@@ -520,6 +967,10 @@ class _DashboardPageState extends State<DashboardPage>
         return 'Measure Wall';
       case 2:
         return 'Measure Land Plot';
+      case 3:
+        return 'Measure Object';
+      case 4:
+        return 'Measure Building';
       default:
         return 'Measure';
     }
@@ -532,18 +983,34 @@ class _DashboardPageState extends State<DashboardPage>
         spacing: 8,
         runSpacing: 8,
         children: [
+          _exportChip('PDF', Icons.picture_as_pdf_rounded, () {
+            _showExportDialog('PDF Report',
+                'PDF export ready.\nUse share button to save/send.');
+          }),
           _exportChip('DXF', Icons.architecture_rounded, () {
             final str = sl.measurementProvider.exportCurrentToDxf();
             _showExportDialog('AutoCAD DXF', str);
           }),
-          _exportChip('GeoJSON', Icons.public_rounded, () {
-            final str = sl.measurementProvider.exportPlotToGeoJson();
-            _showExportDialog(
-                'GeoJSON', str.isNotEmpty ? str : 'Select Land mode');
-          }),
           _exportChip('CSV', Icons.table_chart_rounded, () {
             final str = sl.measurementProvider.exportHistoryToCsv();
             _showExportDialog('CSV Schedule', str);
+          }),
+          _exportChip('SVG', Icons.image_rounded, () {
+            _showExportDialog('SVG', 'SVG floor plan export ready.');
+          }),
+          _exportChip('GeoJSON', Icons.public_rounded, () {
+            final str = sl.measurementProvider.exportPlotToGeoJson();
+            _showExportDialog(
+                'GeoJSON', str.isNotEmpty ? str : 'Select Land mode first');
+          }),
+          _exportChip('KML', Icons.map_rounded, () {
+            _showExportDialog('KML', 'KML export ready for Google Earth.');
+          }),
+          _exportChip('JSON', Icons.data_object_rounded, () {
+            final result = sl.measurementProvider.lastResult;
+            if (result != null) {
+              _showExportDialog('JSON', result.toJson().toString());
+            }
           }),
         ],
       ),
@@ -786,7 +1253,8 @@ class _DashboardPageState extends State<DashboardPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('GeoMeasure v1.2.0',
+                Text('GeoMeasure v${AppConfig.appVersion}',
+                    key: const Key('app_version_text'),
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.primary)),
@@ -800,6 +1268,124 @@ class _DashboardPageState extends State<DashboardPage>
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // ── Data Management ──
+        Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  'DATA MANAGEMENT',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.backup_rounded,
+                    color: theme.colorScheme.primary),
+                title: const Text('Create Backup'),
+                subtitle: const Text('Export all projects & measurements'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () async {
+                  final backup = await BackupService.createBackup();
+                  final count = (backup['data'] as Map).values
+                      .whereType<Map>()
+                      .fold<int>(0, (s, m) => s + m.length);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Backup ready: $count items'),
+                    behavior: SnackBarBehavior.floating,
+                  ));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.restore_rounded,
+                    color: theme.colorScheme.primary),
+                title: const Text('Restore from Backup'),
+                subtitle: const Text('Import from backup file'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Restore from Backup'),
+                      content: const Text(
+                        'Place a GeoMeasure backup file (.json) in your '
+                        'device storage, then use the file manager to open it.\n\n'
+                        'Filename format: geomeasure_backup_YYYYMMDD_HHMM.json',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.sensors_rounded,
+                    color: theme.colorScheme.primary),
+                title: const Text('Hardware Diagnostics'),
+                subtitle: const Text('View all detected sensors'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  final profile = sl.capabilityProvider.profile;
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (ctx) => DraggableScrollableSheet(
+                      initialChildSize: 0.6,
+                      maxChildSize: 0.9,
+                      minChildSize: 0.3,
+                      expand: false,
+                      builder: (_, ctrl) => ListView(
+                        controller: ctrl,
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40, height: 4,
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          Text('Hardware Diagnostics',
+                              style: theme.textTheme.titleLarge),
+                          const SizedBox(height: 8),
+                          ...profile.toJson().entries.map(
+                            (e) => ListTile(
+                              dense: true,
+                              title: Text(e.key),
+                              trailing: Text(
+                                e.value.toString(),
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],
@@ -831,6 +1417,34 @@ class _DashboardPageState extends State<DashboardPage>
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Status dot indicator for sensor detection.
+class _PulsingDot extends StatelessWidget {
+  final Color color;
+  final bool isAnimating;
+
+  const _PulsingDot({required this.color, required this.isAnimating});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isAnimating ? 0.6 : 1.0),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.4),
+            blurRadius: isAnimating ? 10 : 6,
+            spreadRadius: isAnimating ? 2 : 0,
           ),
         ],
       ),

@@ -75,6 +75,52 @@ class GeodeticCalculator {
     return (areaSum.abs()) / 2.0;
   }
 
+  /// Calculates slope between two GPS points using altitude difference.
+  /// Returns slope in degrees (0° = flat, 90° = vertical).
+  static double calculateSlopeDegrees(GpsCoordinate p1, GpsCoordinate p2) {
+    final horizontalDistance = calculateDistanceHaversine(p1, p2);
+    if (horizontalDistance == 0) return 0.0;
+    final elevationDiff = (p2.altitudeMeters - p1.altitudeMeters).abs();
+    return atan(elevationDiff / horizontalDistance) * 180.0 / pi;
+  }
+
+  /// Calculates slope as a percentage (rise/run × 100).
+  static double calculateSlopePercent(GpsCoordinate p1, GpsCoordinate p2) {
+    final horizontalDistance = calculateDistanceHaversine(p1, p2);
+    if (horizontalDistance == 0) return 0.0;
+    final elevationDiff = (p2.altitudeMeters - p1.altitudeMeters).abs();
+    return (elevationDiff / horizontalDistance) * 100.0;
+  }
+
+  /// Calculates elevation difference between two points in meters.
+  static double calculateElevationDifference(
+      GpsCoordinate p1, GpsCoordinate p2) {
+    return p2.altitudeMeters - p1.altitudeMeters;
+  }
+
+  /// Calculates total elevation gain along a path (sum of positive deltas).
+  static double calculateElevationGain(List<GpsCoordinate> path) {
+    if (path.length < 2) return 0.0;
+    double gain = 0.0;
+    for (int i = 1; i < path.length; i++) {
+      final diff = path[i].altitudeMeters - path[i - 1].altitudeMeters;
+      if (diff > 0) gain += diff;
+    }
+    return gain;
+  }
+
+  /// Calculates initial bearing from p1 to p2 in degrees (0-360).
+  static double calculateBearing(GpsCoordinate p1, GpsCoordinate p2) {
+    final lat1 = _degreesToRadians(p1.latitude);
+    final lat2 = _degreesToRadians(p2.latitude);
+    final dLon = _degreesToRadians(p2.longitude - p1.longitude);
+
+    final y = sin(dLon) * cos(lat2);
+    final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+    final bearing = atan2(y, x) * 180.0 / pi;
+    return (bearing + 360.0) % 360.0;
+  }
+
   static double _degreesToRadians(double degrees) {
     return degrees * pi / 180.0;
   }
