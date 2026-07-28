@@ -175,22 +175,22 @@ void main() {
 
     test('GeodeticCalculator: 2-point polygon area is 0', () {
       final pts = [
-        GpsCoordinate(latitude: 0, longitude: 0),
-        GpsCoordinate(latitude: 1, longitude: 1),
+        const GpsCoordinate(latitude: 0, longitude: 0),
+        const GpsCoordinate(latitude: 1, longitude: 1),
       ];
       expect(GeodeticCalculator.calculatePolygonAreaGeodetic(pts), equals(0.0));
     });
 
     test('GeodeticCalculator: same point distance is 0', () {
-      final p = GpsCoordinate(latitude: 12.0, longitude: 77.0);
+      const p = GpsCoordinate(latitude: 12.0, longitude: 77.0);
       expect(GeodeticCalculator.calculateDistanceHaversine(p, p), equals(0.0));
     });
 
     test('GeodeticCalculator: elevation gain all descending is 0', () {
       final path = [
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 300),
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 200),
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 300),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 200),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100),
       ];
       expect(GeodeticCalculator.calculateElevationGain(path), equals(0.0));
     });

@@ -53,7 +53,7 @@ class BackupService {
       final backup = jsonDecode(json) as Map<String, dynamic>;
 
       if (backup['app'] != 'GeoMeasure') {
-        return BackupResult(
+        return const BackupResult(
             success: false, message: 'Not a GeoMeasure backup file');
       }
 

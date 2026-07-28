@@ -58,66 +58,66 @@ CapabilityProfile _profile({
 void main() {
   group('Slope & Elevation Calculations', () {
     test('calculateSlopeDegrees returns 0 for flat terrain', () {
-      final p1 = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
-      final p2 = GpsCoordinate(latitude: 12.001, longitude: 77.0, altitudeMeters: 100);
+      const p1 = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
+      const p2 = GpsCoordinate(latitude: 12.001, longitude: 77.0, altitudeMeters: 100);
       expect(GeodeticCalculator.calculateSlopeDegrees(p1, p2), equals(0.0));
     });
 
     test('calculateSlopeDegrees returns ~45 for equal rise and run', () {
-      final p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0, altitudeMeters: 0);
-      final p2 = GpsCoordinate(latitude: 0.0009, longitude: 0.0, altitudeMeters: 100);
+      const p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0, altitudeMeters: 0);
+      const p2 = GpsCoordinate(latitude: 0.0009, longitude: 0.0, altitudeMeters: 100);
       final slope = GeodeticCalculator.calculateSlopeDegrees(p1, p2);
       expect(slope, greaterThan(40));
       expect(slope, lessThan(50));
     });
 
     test('calculateSlopePercent returns 0 for flat terrain', () {
-      final p1 = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 50);
-      final p2 = GpsCoordinate(latitude: 12.01, longitude: 77.0, altitudeMeters: 50);
+      const p1 = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 50);
+      const p2 = GpsCoordinate(latitude: 12.01, longitude: 77.0, altitudeMeters: 50);
       expect(GeodeticCalculator.calculateSlopePercent(p1, p2), equals(0.0));
     });
 
     test('calculateElevationDifference positive when ascending', () {
-      final p1 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100);
-      final p2 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 250);
+      const p1 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100);
+      const p2 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 250);
       expect(GeodeticCalculator.calculateElevationDifference(p1, p2), equals(150.0));
     });
 
     test('calculateElevationDifference negative when descending', () {
-      final p1 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 250);
-      final p2 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100);
+      const p1 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 250);
+      const p2 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100);
       expect(GeodeticCalculator.calculateElevationDifference(p1, p2), equals(-150.0));
     });
 
     test('calculateElevationGain sums only positive deltas', () {
       final path = [
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100),
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 200),
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 150),
-        GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 300),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 200),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 150),
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 300),
       ];
       expect(GeodeticCalculator.calculateElevationGain(path), equals(250.0));
     });
 
     test('calculateElevationGain returns 0 for single point', () {
-      final path = [GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100)];
+      final path = [const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100)];
       expect(GeodeticCalculator.calculateElevationGain(path), equals(0.0));
     });
 
     test('calculateBearing north is ~0 degrees', () {
-      final p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0);
-      final p2 = GpsCoordinate(latitude: 1.0, longitude: 0.0);
+      const p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0);
+      const p2 = GpsCoordinate(latitude: 1.0, longitude: 0.0);
       expect(GeodeticCalculator.calculateBearing(p1, p2), closeTo(0.0, 1.0));
     });
 
     test('calculateBearing east is ~90 degrees', () {
-      final p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0);
-      final p2 = GpsCoordinate(latitude: 0.0, longitude: 1.0);
+      const p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0);
+      const p2 = GpsCoordinate(latitude: 0.0, longitude: 1.0);
       expect(GeodeticCalculator.calculateBearing(p1, p2), closeTo(90.0, 1.0));
     });
 
     test('calculateSlopeDegrees returns 0 for same point', () {
-      final p = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
+      const p = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
       expect(GeodeticCalculator.calculateSlopeDegrees(p, p), equals(0.0));
     });
   });
@@ -250,14 +250,14 @@ void main() {
 
   group('Image Exporter', () {
     test('generateFilename includes shape type and format', () {
-      final shape = RectangleShape(lengthMeters: 5, widthMeters: 3);
+      const shape = RectangleShape(lengthMeters: 5, widthMeters: 3);
       final filename = ImageExporter.generateFilename(shape, 'png');
       expect(filename, contains('rectangle'));
       expect(filename, endsWith('.png'));
     });
 
     test('generateCaption includes area', () {
-      final shape = RectangleShape(lengthMeters: 5, widthMeters: 3);
+      const shape = RectangleShape(lengthMeters: 5, widthMeters: 3);
       final caption = ImageExporter.generateCaption(shape);
       expect(caption, contains('15.00'));
       expect(caption, contains('m'));

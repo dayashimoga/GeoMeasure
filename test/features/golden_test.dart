@@ -13,24 +13,24 @@ import 'package:geomeasure/features/measurement_engine/domain/entities/spatial_s
 void main() {
   group('Golden — Structural Layout Tests', () {
     testWidgets('measurement result card layout', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: Center(
             child: SizedBox(
               width: 320,
               child: Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Rectangle',
+                      Text('Rectangle',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _MetricRow('Length', '5.00 m'),
                       _MetricRow('Width', '3.00 m'),
-                      const Divider(),
+                      Divider(),
                       _MetricRow('Area', '15.00 m²'),
                       _MetricRow('Perimeter', '16.00 m'),
                     ],
@@ -112,10 +112,10 @@ void main() {
     });
 
     testWidgets('review row layout renders correctly', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -137,16 +137,16 @@ void main() {
     testWidgets('dark theme renders without errors', (tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
-        home: Scaffold(
+        home: const Scaffold(
           body: Center(
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Dark Mode Test'),
-                    const SizedBox(height: 8),
+                    Text('Dark Mode Test'),
+                    SizedBox(height: 8),
                     _MetricRow('Area', '15.00 m²'),
                   ],
                 ),
@@ -218,21 +218,21 @@ void main() {
 
   group('Golden — Shape Rendering Validation', () {
     test('RectangleShape produces correct metrics for display', () {
-      final shape = RectangleShape(lengthMeters: 5, widthMeters: 3);
+      const shape = RectangleShape(lengthMeters: 5, widthMeters: 3);
       expect(shape.calculateAreaInSquareMeters(), equals(15.0));
       expect(shape.calculatePerimeterInMeters(), equals(16.0));
       expect(shape.type, equals(ShapeType.rectangle));
     });
 
     test('CircleShape produces correct metrics for display', () {
-      final shape = CircleShape(radiusMeters: 5);
+      const shape = CircleShape(radiusMeters: 5);
       final area = shape.calculateAreaInSquareMeters();
       expect(area, closeTo(78.54, 0.1));
       expect(shape.type, equals(ShapeType.circle));
     });
 
     test('TriangleShape produces correct metrics for display', () {
-      final shape = TriangleShape(sideA: 3, sideB: 4, sideC: 5);
+      const shape = TriangleShape(sideA: 3, sideB: 4, sideC: 5);
       expect(shape.calculateAreaInSquareMeters(), closeTo(6.0, 0.01));
       expect(shape.type, equals(ShapeType.triangle));
     });

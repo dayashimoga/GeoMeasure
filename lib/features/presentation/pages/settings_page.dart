@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/data/backup_service.dart';
 import '../../../core/di/service_locator.dart';
-import '../../../core/theme/app_theme.dart';
 
 /// Settings page with backup/restore, theme, and diagnostics.
 class SettingsPage extends StatelessWidget {
@@ -23,7 +21,7 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // ── Appearance ──
-          _SectionHeader(title: 'Appearance', icon: Icons.palette_rounded),
+          const _SectionHeader(title: 'Appearance', icon: Icons.palette_rounded),
           Card(
             child: Column(
               children: [
@@ -41,7 +39,7 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── Data Management ──
-          _SectionHeader(
+          const _SectionHeader(
               title: 'Data Management', icon: Icons.storage_rounded),
           Card(
             child: Column(
@@ -79,7 +77,7 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── Advanced / Diagnostics ──
-          _SectionHeader(title: 'Advanced', icon: Icons.build_rounded),
+          const _SectionHeader(title: 'Advanced', icon: Icons.build_rounded),
           Card(
             child: Column(
               children: [

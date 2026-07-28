@@ -1,3 +1,5 @@
+library;
+
 /// Map tile, terrain, and satellite imagery service abstraction.
 ///
 /// Default implementation uses OpenStreetMap (free, no API key required).
@@ -209,15 +211,23 @@ class MapService {
 
   static double _sinApprox(double x) {
     // Normalize to [-π, π]
-    while (x > 3.14159265358979) x -= 2 * 3.14159265358979;
-    while (x < -3.14159265358979) x += 2 * 3.14159265358979;
+    while (x > 3.14159265358979) {
+      x -= 2 * 3.14159265358979;
+    }
+    while (x < -3.14159265358979) {
+      x += 2 * 3.14159265358979;
+    }
     final x2 = x * x;
     return x * (1 - x2 / 6 + x2 * x2 / 120 - x2 * x2 * x2 / 5040);
   }
 
   static double _cosApprox(double x) {
-    while (x > 3.14159265358979) x -= 2 * 3.14159265358979;
-    while (x < -3.14159265358979) x += 2 * 3.14159265358979;
+    while (x > 3.14159265358979) {
+      x -= 2 * 3.14159265358979;
+    }
+    while (x < -3.14159265358979) {
+      x += 2 * 3.14159265358979;
+    }
     final x2 = x * x;
     return 1 - x2 / 2 + x2 * x2 / 24 - x2 * x2 * x2 / 720;
   }

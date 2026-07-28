@@ -737,7 +737,7 @@ class _DashboardPageState extends State<DashboardPage>
               Navigator.of(ctx).pop();
               _runMeasurement(profile, RoomShape(
                 vertices: [
-                  Point3D(0, 0), Point3D(l, 0),
+                  const Point3D(0, 0), Point3D(l, 0),
                   Point3D(l, w), Point3D(0, w),
                 ],
                 heightMeters: h,

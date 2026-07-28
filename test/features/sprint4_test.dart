@@ -168,17 +168,17 @@ void main() {
   // ━━━ Spatial Shape Edge Cases ━━━
   group('SpatialShape — boundary conditions', () {
     test('zero-dimension rectangle has 0 area', () {
-      final shape = RectangleShape(lengthMeters: 0, widthMeters: 5);
+      const shape = RectangleShape(lengthMeters: 0, widthMeters: 5);
       expect(shape.calculateAreaInSquareMeters(), equals(0.0));
     });
 
     test('very large rectangle computes without overflow', () {
-      final shape = RectangleShape(lengthMeters: 1e6, widthMeters: 1e6);
+      const shape = RectangleShape(lengthMeters: 1e6, widthMeters: 1e6);
       expect(shape.calculateAreaInSquareMeters(), equals(1e12));
     });
 
     test('very small circle computes area', () {
-      final shape = CircleShape(radiusMeters: 0.001);
+      const shape = CircleShape(radiusMeters: 0.001);
       expect(shape.calculateAreaInSquareMeters(), greaterThan(0));
       expect(shape.calculateAreaInSquareMeters(), lessThan(0.01));
     });

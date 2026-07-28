@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geomeasure/features/measurement_engine/domain/entities/spatial_shape.dart';
 import 'package:geomeasure/features/measurement_engine/domain/entities/measurement_unit.dart';
 import 'package:geomeasure/features/measurement_engine/domain/services/unit_converter.dart';
-import 'package:geomeasure/features/visualization/domain/services/polygon_editor.dart';
 
 /// Accessibility tests verify that key widgets and components
 /// expose correct semantics for screen readers and assistive technology.
@@ -93,10 +92,10 @@ void main() {
 
   group('Accessibility — Text Scaling', () {
     testWidgets('text scales without overflow', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
-          child: const Scaffold(
+          data: MediaQueryData(textScaler: TextScaler.linear(2.0)),
+          child: Scaffold(
             body: Center(child: Text('15.00 m²')),
           ),
         ),
@@ -137,16 +136,14 @@ void main() {
 
   group('Accessibility — Color & Contrast', () {
     test('primary theme colors meet contrast requirements', () {
-      // Material 3 seed-based themes guarantee WCAG AA contrast
       final theme = ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       );
-      // Primary vs onPrimary should have sufficient contrast
       final primary = theme.colorScheme.primary;
       final onPrimary = theme.colorScheme.onPrimary;
       final contrast = _contrastRatio(primary, onPrimary);
-      expect(contrast, greaterThanOrEqualTo(3.0)); // WCAG AA for large text
+      expect(contrast, greaterThanOrEqualTo(3.0));
     });
 
     test('dark theme colors meet contrast requirements', () {
@@ -165,17 +162,16 @@ void main() {
       final theme = ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue);
       final error = theme.colorScheme.error;
       final primary = theme.colorScheme.primary;
-      // Error and primary should be visually distinct
-      expect(error.value, isNot(equals(primary.value)));
+      expect(error, isNot(equals(primary)));
     });
   });
 
   group('Accessibility — Logical Ordering', () {
     test('shapes provide computable results', () {
-      final rect = RectangleShape(lengthMeters: 5, widthMeters: 3);
+      const rect = RectangleShape(lengthMeters: 5, widthMeters: 3);
       expect(rect.calculateAreaInSquareMeters(), equals(15.0));
 
-      final circle = CircleShape(radiusMeters: 2);
+      const circle = CircleShape(radiusMeters: 2);
       expect(circle.calculateAreaInSquareMeters(), greaterThan(12));
     });
 
@@ -199,9 +195,9 @@ void main() {
 /// Calculate relative luminance contrast ratio per WCAG 2.1.
 double _contrastRatio(Color a, Color b) {
   double luminance(Color c) {
-    final r = c.red / 255.0;
-    final g = c.green / 255.0;
-    final b = c.blue / 255.0;
+    final r = c.r;
+    final g = c.g;
+    final b = c.b;
     final rL = r <= 0.03928 ? r / 12.92 : _pow((r + 0.055) / 1.055, 2.4);
     final gL = g <= 0.03928 ? g / 12.92 : _pow((g + 0.055) / 1.055, 2.4);
     final bL = b <= 0.03928 ? b / 12.92 : _pow((b + 0.055) / 1.055, 2.4);
@@ -215,13 +211,11 @@ double _contrastRatio(Color a, Color b) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/// Simple power function (avoid dart:math import in test).
+/// Simple power function.
 double _pow(double base, double exp) {
   if (exp == 2.4) {
-    // For sRGB gamma correction
     final sq = base * base;
-    final frac = base * base * base; // ≈ base^2.4 approximation
-    return sq * (0.4 * base + 0.6); // Close enough for contrast ratio
+    return sq * (0.4 * base + 0.6);
   }
   return base;
 }
