@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import '../../../measurement_engine/domain/entities/spatial_shape.dart';
 
 /// Interactive polygon editing operations for floor plan canvas.
@@ -109,9 +110,9 @@ class PolygonEditor {
     if (_vertices.isEmpty) return vertices;
     final cx = _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
     final cy = _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
-    final rad = angleDegrees * 3.14159265358979 / 180.0;
-    final cosA = _cos(rad);
-    final sinA = _sin(rad);
+    final rad = angleDegrees * math.pi / 180.0;
+    final cosA = math.cos(rad);
+    final sinA = math.sin(rad);
 
     _vertices = _vertices.map((v) {
       final dx = v.x - cx;
@@ -175,16 +176,4 @@ class PolygonEditor {
     return Point3D(cx, cy, 0);
   }
 
-  // Inline trig to avoid importing dart:math in pure domain code
-  static double _cos(double x) {
-    // Taylor series cos(x) ≈ 1 - x²/2 + x⁴/24 - x⁶/720
-    final x2 = x * x;
-    return 1 - x2 / 2 + x2 * x2 / 24 - x2 * x2 * x2 / 720;
-  }
-
-  static double _sin(double x) {
-    // Taylor series sin(x) ≈ x - x³/6 + x⁵/120 - x⁷/5040
-    final x2 = x * x;
-    return x - x * x2 / 6 + x * x2 * x2 / 120 - x * x2 * x2 * x2 / 5040;
-  }
 }

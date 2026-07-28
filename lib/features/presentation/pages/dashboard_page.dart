@@ -16,6 +16,7 @@ import '../widgets/measurement_display.dart';
 import 'gps_tracking_page.dart';
 import 'camera_measurement_page.dart';
 import 'measurement_history_page.dart';
+import 'measurement_wizard_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final VoidCallback? onToggleTheme;
@@ -151,18 +152,37 @@ class _DashboardPageState extends State<DashboardPage>
           _buildSettingsTab(theme),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final profile = sl.capabilityProvider.profile;
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => CameraMeasurementPage(profile: profile),
-            ),
-          );
-        },
-        icon: const Icon(Icons.camera_alt_rounded),
-        label: const Text('Camera'),
-        tooltip: 'Camera Measurement',
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: 'wizard_fab',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const MeasurementWizardPage(),
+                ),
+              );
+            },
+            tooltip: 'Measurement Wizard',
+            child: const Icon(Icons.auto_fix_high_rounded),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'camera_fab',
+            onPressed: () {
+              final profile = sl.capabilityProvider.profile;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CameraMeasurementPage(profile: profile),
+                ),
+              );
+            },
+            icon: const Icon(Icons.camera_alt_rounded),
+            label: const Text('Camera'),
+            tooltip: 'Camera Measurement',
+          ),
+        ],
       ),
     );
   }
