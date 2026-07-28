@@ -2,6 +2,16 @@
 
 All notable changes to GeoMeasure are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.5.0] - 2026-07-28
+
+### Added
+- **PolygonEditor** — vertex add/delete/move, edge split, rotate, scale, snap-to-grid, undo/redo history
+- **ProjectVersionHistory** — snapshot recording, version diff comparison, JSON serialization
+- **BackupService** — full Hive JSON backup/restore with versioning
+- **Settings tab** — Create Backup, Restore, Hardware Diagnostics bottom sheet
+- **Dashboard confidence badge** — shows engine confidence % instead of sensor count
+- 56 new tests (294 total) covering polygon editing, version history, failure/edge cases
+
 ## [2.4.0] - 2026-07-28
 
 ### Added
