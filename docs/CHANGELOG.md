@@ -2,6 +2,14 @@
 
 All notable changes to GeoMeasure are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.8.0] - 2026-07-28
+
+### Added
+- **Complete Test Suite Overhaul** — 407/407 tests passing (+168 tests): sensor simulation (13), GPS tracking simulation (12), camera mock (21), accessibility & WCAG contrast (15), structural layout & golden tests (13), outdoor map services (25).
+- **MapService & Free Tile Providers** — 4 free map tile providers (OpenStreetMap, OpenTopoMap, Esri Satellite, Stamen Terrain) requiring zero API keys or external paid subscriptions.
+- **Zero Analysis Issues** — 173 linter issues resolved, 0 errors, 0 warnings across the entire repository.
+- **Documentation Consolidation** — Added `TODO.md`, `TASKS.md`, `CI_CD.md` to `/docs` completing the 23-file specification.
+
 ## [2.5.0] - 2026-07-28
 
 ### Added

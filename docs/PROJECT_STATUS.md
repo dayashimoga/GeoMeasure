@@ -1,6 +1,6 @@
 # Project Status
 
-**Version**: 2.7.0+16 | **Date**: 2026-07-28 | **Tests**: 407/407 passing
+**Version**: 2.8.0+18 | **Date**: 2026-07-28 | **Tests**: 407/407 passing
 
 ## Build Status
 
