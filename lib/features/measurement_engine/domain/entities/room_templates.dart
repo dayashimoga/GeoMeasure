@@ -26,7 +26,7 @@ class RoomTemplate {
   /// Convert template to a RoomShape.
   RoomShape toRoomShape() => RoomShape(
         vertices: [
-          Point3D(0, 0),
+          const Point3D(0, 0),
           Point3D(lengthMeters, 0),
           Point3D(lengthMeters, widthMeters),
           Point3D(0, widthMeters),

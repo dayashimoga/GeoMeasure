@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/di/service_locator.dart';
-import '../../measurement_engine/domain/entities/measurement_unit.dart';
 
 /// Displays aggregate statistics from measurement history.
 ///

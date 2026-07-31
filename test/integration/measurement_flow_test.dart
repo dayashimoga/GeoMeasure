@@ -22,12 +22,12 @@ void main() {
     });
 
     test('room with height → volume + wall area', () {
-      final room = RoomShape(
+      const room = RoomShape(
         vertices: [
-          const Point3D(0, 0),
-          const Point3D(5, 0),
-          const Point3D(5, 4),
-          const Point3D(0, 4),
+          Point3D(0, 0),
+          Point3D(5, 0),
+          Point3D(5, 4),
+          Point3D(0, 4),
         ],
         heightMeters: 3.0,
       );
@@ -57,11 +57,11 @@ void main() {
     });
 
     test('wall shape with openings → net area', () {
-      final wall = WallShape(
+      const wall = WallShape(
         lengthMeters: 6.0,
         heightMeters: 3.0,
         openings: [
-          const WallOpening(label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
+          WallOpening(label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
         ],
       );
       expect(wall.validate(), isNull);
@@ -160,12 +160,12 @@ void main() {
 
   group('GPS Land Survey Flow', () {
     test('PlotShape from GPS waypoints → geodetic area', () {
-      final plot = PlotShape(
+      const plot = PlotShape(
         coordinates: [
-          const GpsCoordinate(latitude: 0.0, longitude: 0.0),
-          const GpsCoordinate(latitude: 0.0009, longitude: 0.0),
-          const GpsCoordinate(latitude: 0.0009, longitude: 0.0009),
-          const GpsCoordinate(latitude: 0.0, longitude: 0.0009),
+          GpsCoordinate(latitude: 0.0, longitude: 0.0),
+          GpsCoordinate(latitude: 0.0009, longitude: 0.0),
+          GpsCoordinate(latitude: 0.0009, longitude: 0.0009),
+          GpsCoordinate(latitude: 0.0, longitude: 0.0009),
         ],
       );
       expect(plot.validate(), isNull);
@@ -175,11 +175,11 @@ void main() {
     });
 
     test('KML export from GPS plot', () {
-      final plot = PlotShape(
+      const plot = PlotShape(
         coordinates: [
-          const GpsCoordinate(latitude: 12.9716, longitude: 77.5946),
-          const GpsCoordinate(latitude: 12.9726, longitude: 77.5946),
-          const GpsCoordinate(latitude: 12.9726, longitude: 77.5956),
+          GpsCoordinate(latitude: 12.9716, longitude: 77.5946),
+          GpsCoordinate(latitude: 12.9726, longitude: 77.5946),
+          GpsCoordinate(latitude: 12.9726, longitude: 77.5956),
         ],
       );
       final kml = KmlExporter.generateKml(plot);
@@ -189,11 +189,11 @@ void main() {
     });
 
     test('GeoJSON export from GPS plot', () {
-      final plot = PlotShape(
+      const plot = PlotShape(
         coordinates: [
-          const GpsCoordinate(latitude: 12.9716, longitude: 77.5946),
-          const GpsCoordinate(latitude: 12.9726, longitude: 77.5946),
-          const GpsCoordinate(latitude: 12.9726, longitude: 77.5956),
+          GpsCoordinate(latitude: 12.9716, longitude: 77.5946),
+          GpsCoordinate(latitude: 12.9726, longitude: 77.5946),
+          GpsCoordinate(latitude: 12.9726, longitude: 77.5956),
         ],
       );
       final json = GeoJsonExporter.generateGeoJson(plot);
@@ -204,12 +204,12 @@ void main() {
 
   group('Material Estimation Flow', () {
     test('room estimate produces materials', () {
-      final room = RoomShape(
+      const room = RoomShape(
         vertices: [
-          const Point3D(0, 0),
-          const Point3D(5, 0),
-          const Point3D(5, 4),
-          const Point3D(0, 4),
+          Point3D(0, 0),
+          Point3D(5, 0),
+          Point3D(5, 4),
+          Point3D(0, 4),
         ],
         heightMeters: 3.0,
       );

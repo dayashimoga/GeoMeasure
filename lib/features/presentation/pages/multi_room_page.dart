@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart' hide MaterialType;
-import '../../../core/di/service_locator.dart';
 import '../../measurement_engine/domain/entities/spatial_shape.dart';
-import '../../measurement_engine/domain/entities/measurement_unit.dart';
 import '../../measurement_engine/domain/entities/room_templates.dart';
-import '../../measurement_engine/domain/services/unit_converter.dart';
 import '../../estimation/domain/entities/material_estimate.dart';
 import '../widgets/paint_tile_calculator.dart';
 
@@ -47,7 +44,7 @@ class _MultiRoomPageState extends State<MultiRoomPage> {
         name: name,
         shape: RoomShape(
           vertices: [
-            Point3D(0, 0),
+            const Point3D(0, 0),
             Point3D(length, 0),
             Point3D(length, width),
             Point3D(0, width),

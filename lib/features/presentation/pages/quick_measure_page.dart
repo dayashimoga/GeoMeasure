@@ -114,7 +114,7 @@ class _QuickMeasurePageState extends State<QuickMeasurePage> {
         }
         shape = RoomShape(
           vertices: [
-            Point3D(0, 0),
+            const Point3D(0, 0),
             Point3D(d1, 0),
             Point3D(d1, d2),
             Point3D(0, d2),
@@ -131,8 +131,6 @@ class _QuickMeasurePageState extends State<QuickMeasurePage> {
         setState(() => _validationError = 'Shape not supported');
         return;
     }
-
-    if (shape == null) return;
 
     final err = shape.validate();
     if (err != null) {

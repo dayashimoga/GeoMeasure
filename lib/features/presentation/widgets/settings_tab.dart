@@ -121,13 +121,14 @@ class _SettingsTabState extends State<SettingsTab> {
                 subtitle: const Text('Export all projects & measurements'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () async {
+                  final messenger = ScaffoldMessenger.of(context);
                   final backup = await BackupService.createBackup();
                   final count = (backup['data'] as Map)
                       .values
                       .whereType<Map>()
                       .fold<int>(0, (s, m) => s + m.length);
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  messenger.showSnackBar(SnackBar(
                     content: Text('Backup ready: $count items'),
                     behavior: SnackBarBehavior.floating,
                   ));
