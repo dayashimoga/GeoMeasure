@@ -26,7 +26,8 @@ void main() {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Rectangle',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       SizedBox(height: 8),
                       _MetricRow('Length', '5.00 m'),
                       _MetricRow('Width', '3.00 m'),
@@ -61,10 +62,22 @@ void main() {
           body: Wrap(
             spacing: 8,
             children: [
-              ChoiceChip(label: const Text('Rectangle'), selected: true, onSelected: (_) {}),
-              ChoiceChip(label: const Text('Circle'), selected: false, onSelected: (_) {}),
-              ChoiceChip(label: const Text('Triangle'), selected: false, onSelected: (_) {}),
-              ChoiceChip(label: const Text('L-Shape'), selected: false, onSelected: (_) {}),
+              ChoiceChip(
+                  label: const Text('Rectangle'),
+                  selected: true,
+                  onSelected: (_) {}),
+              ChoiceChip(
+                  label: const Text('Circle'),
+                  selected: false,
+                  onSelected: (_) {}),
+              ChoiceChip(
+                  label: const Text('Triangle'),
+                  selected: false,
+                  onSelected: (_) {}),
+              ChoiceChip(
+                  label: const Text('L-Shape'),
+                  selected: false,
+                  onSelected: (_) {}),
             ],
           ),
         ),
@@ -160,7 +173,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('responsive layout: narrow width renders single column', (tester) async {
+    testWidgets('responsive layout: narrow width renders single column',
+        (tester) async {
       tester.view.physicalSize = const Size(360, 640);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -188,7 +202,8 @@ void main() {
       expect(find.byType(Column), findsWidgets);
     });
 
-    testWidgets('responsive layout: wide width renders two columns', (tester) async {
+    testWidgets('responsive layout: wide width renders two columns',
+        (tester) async {
       tester.view.physicalSize = const Size(1024, 768);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -252,10 +267,11 @@ class _MetricRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value, style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          )),
+          Text(value,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              )),
         ],
       ),
     );

@@ -87,11 +87,9 @@ class MeasurementValidation {
       MeasurementValidation(
         confidenceScore: (m['confidenceScore'] as num).toDouble(),
         estimatedAccuracy: (m['estimatedAccuracy'] as num).toDouble(),
-        errorMarginMeters:
-            (m['errorMarginMeters'] as num?)?.toDouble() ?? 0.0,
+        errorMarginMeters: (m['errorMarginMeters'] as num?)?.toDouble() ?? 0.0,
         sensorUsed: m['sensorUsed'] as String? ?? 'device_default',
-        measurementMethod:
-            m['measurementMethod'] as String? ?? 'direct',
+        measurementMethod: m['measurementMethod'] as String? ?? 'direct',
         calibrationStatus: CalibrationStatus.values.firstWhere(
           (e) => e.name == (m['calibrationStatus'] as String?),
           orElse: () => CalibrationStatus.uncalibrated,
@@ -103,8 +101,7 @@ class MeasurementValidation {
         timestamp: DateTime.tryParse(m['timestamp'] as String? ?? '') ??
             DateTime.now(),
         sampleCount: m['sampleCount'] as int? ?? 1,
-        standardDeviation:
-            (m['standardDeviation'] as num?)?.toDouble() ?? 0.0,
+        standardDeviation: (m['standardDeviation'] as num?)?.toDouble() ?? 0.0,
       );
 }
 

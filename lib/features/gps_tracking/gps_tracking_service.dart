@@ -204,7 +204,8 @@ class GpsTrackingProvider extends ChangeNotifier {
     try {
       _serviceEnabled = await _service.isLocationServiceEnabled();
       if (!_serviceEnabled) {
-        _errorMessage = 'Location services are disabled. Enable GPS in device settings.';
+        _errorMessage =
+            'Location services are disabled. Enable GPS in device settings.';
         notifyListeners();
         return;
       }
@@ -215,7 +216,8 @@ class GpsTrackingProvider extends ChangeNotifier {
       }
 
       if (!_hasPermission) {
-        _errorMessage = 'Location permission denied. Grant access in app settings.';
+        _errorMessage =
+            'Location permission denied. Grant access in app settings.';
         notifyListeners();
         return;
       }

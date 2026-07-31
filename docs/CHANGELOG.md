@@ -2,6 +2,54 @@
 
 All notable changes to GeoMeasure are documented in this file. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.4.0] - 2026-07-31
+
+### Added - Sprint 4: Working Features & Usability Enhancements
+- **Default Unit Costs**: Populated default INR prices for construction materials (concrete, cement, bricks, steel, paint, tiles, plaster, sand, gravel) so BOQ generation outputs realistic cost estimates.
+- **Room Templates**: 14 standard residential presets (Master Bedroom, Kitchen, Bathroom, Living Room, Pooja Room, Studio, etc.) with preconfigured dimensions and typical openings.
+- **Paint & Tile Calculator**: Dedicated standalone calculator widget (`PaintTileCalculator`) with coverage rates, wastage percentage, can size options (1L, 4L, 10L, 20L), box counts, and cost estimation.
+- **Quick Measure Page**: Direct shape selection (Rectangle, Square, Circle, Triangle, Ellipse, Trapezoid, Room, Wall) with dynamic input fields, live Canvas shape preview, and instant metric/imperial results.
+- **Multi-Room Batch Survey**: Measure full houses room-by-room with template or custom inputs, running aggregate totals (floor area, wall area, volume), combined BOQ rollup, and direct paint/tile calculator integration.
+- **Measurement Summary Statistics**: Dashboard analytics widget showing total measurement count, total area, average room size, top shape used, largest/smallest records, and distinct shape types.
+- **Dashboard Quick Tools Grid**: Instant navigation shortcuts on the main measure tab for Quick Measure, Multi-Room Survey, Paint & Tiles, and History.
+
+## [2.3.2] - 2026-07-29
+
+### Added
+- **Excel export** — Wired `ExcelExporter` (pure Dart XLSX) into dashboard export panel
+- **Extracted `AlgorithmBanner` widget** — Reusable algorithm engine display with confidence badge
+- **Extracted `ExportPanel` widget** — Reusable export buttons with clipboard copy, all 8 formats
+- **`TECHNICAL_DESIGN.md`** — Architecture, pipeline, shapes, algorithms, exports, state management
+- **Camera reference object tip** — "Place credit card in frame for scale reference"
+- **Wizard Land mode GPS redirect** — Land mode in wizard navigates to GPS tracking page
+
+### Fixed
+- **Camera page `?? 3.0`/`?? 2.5` fallback** — Now validates before calculating
+- **Wizard always saved as RectangleShape** — Now uses correct shape type (Circle, Triangle, Room)
+- **Wizard `?? 1` fallback** — Validates dimensions before save
+- **TriangleShape parameter names** — `sideA`/`sideB`/`sideC` (not `sideAMeters`)
+- **Settings page version** — Fixed 2.4.0 → 2.3.0 to match pubspec
+
+## [2.3.1] - 2026-07-29
+
+### Fixed
+- **CRITICAL: Eliminated fake measurement pipeline** — All measurement dialogs (Room, Wall, Object, Building) no longer pre-fill hardcoded dimensions (e.g., 6.0×4.5×3.0). Users must enter their own real measured values.
+- **CRITICAL: Fixed GPS Land mode** — Removed hardcoded San Francisco coordinates (37.7749, -122.4194). Land mode now navigates to the real GPS Tracking page where users collect actual GPS waypoints and convert them to plot measurements.
+- **Input validation** — All dimension dialogs now validate that values are positive numbers before allowing measurement. Invalid inputs show error snackbar.
+- **Camera measurement page** — Removed hardcoded dimension defaults (3.0×2.5).
+- **Measurement wizard** — Removed hardcoded dimension defaults (5.0×3.0×2.8×3.0).
+
+### Changed
+- Land mode execute button text: "Measure Land Plot" → "Start GPS Land Survey" with GPS icon
+- Measurement input dialogs now include helpful hint text (e.g., "e.g. 5.2") and instruction text
+- Wall measurement no longer auto-adds fake door/window openings
+
+### Documentation
+- **PROJECT_STATUS.md** — Complete rewrite with honest assessment. Changed claimed 90% completion to actual ~33%. All placeholder features now correctly documented.
+- **Full production gap analysis** — Audited all 78 source files across 15 feature modules
+- **Feature Gap Matrix** — Every expected feature classified as ✅/🟡/❌/⚠/🚫/🔁
+
+
 ## [2.8.0] - 2026-07-28
 
 ### Added

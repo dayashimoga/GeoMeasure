@@ -21,7 +21,8 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // ── Appearance ──
-          const _SectionHeader(title: 'Appearance', icon: Icons.palette_rounded),
+          const _SectionHeader(
+              title: 'Appearance', icon: Icons.palette_rounded),
           Card(
             child: Column(
               children: [
@@ -110,7 +111,8 @@ class SettingsPage extends StatelessWidget {
   Future<void> _createBackup(BuildContext context) async {
     try {
       final backup = await BackupService.createBackup();
-      final itemCount = (backup['data'] as Map).values
+      final itemCount = (backup['data'] as Map)
+          .values
           .whereType<Map>()
           .fold<int>(0, (sum, m) => sum + m.length);
 
@@ -249,7 +251,7 @@ class SettingsPage extends StatelessWidget {
     showAboutDialog(
       context: context,
       applicationName: 'GeoMeasure',
-      applicationVersion: '2.4.0',
+      applicationVersion: '2.3.0',
       applicationLegalese: '© 2026 GeoMeasure. All rights reserved.',
       children: [
         const SizedBox(height: 16),
@@ -274,8 +276,7 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18,
-              color: Theme.of(context).colorScheme.primary),
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,

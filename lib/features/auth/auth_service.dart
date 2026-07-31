@@ -12,6 +12,7 @@ import '../../core/logging/app_logger.dart';
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 enum AuthStatus { unauthenticated, authenticating, authenticated, error }
+
 enum AuthMethod { email, google, apple, anonymous }
 
 /// Authenticated user model.
@@ -174,8 +175,7 @@ class LocalAuthService {
 
     if (computedHash != storedHash) {
       logger.warning('Failed sign-in attempt for $email', tag: 'Auth');
-      return const AuthResult(
-          success: false, errorMessage: 'Invalid password');
+      return const AuthResult(success: false, errorMessage: 'Invalid password');
     }
 
     final userMap = cred['user'] as Map<String, dynamic>;
@@ -224,8 +224,7 @@ class LocalAuthService {
     required String newPassword,
   }) async {
     // Verify current password
-    final signInResult =
-        await signIn(email: email, password: currentPassword);
+    final signInResult = await signIn(email: email, password: currentPassword);
     if (!signInResult.success) {
       return const AuthResult(
           success: false, errorMessage: 'Current password is incorrect');
@@ -240,7 +239,8 @@ class LocalAuthService {
     final box = await Hive.openBox<String>(_credBox);
     final credJson = box.get(email.toLowerCase());
     if (credJson == null) {
-      return const AuthResult(success: false, errorMessage: 'Account not found');
+      return const AuthResult(
+          success: false, errorMessage: 'Account not found');
     }
 
     final cred = jsonDecode(credJson) as Map<String, dynamic>;
@@ -294,10 +294,22 @@ class LocalAuthService {
     }
 
     return [
-      (h1 >> 24) & 0xFF, (h1 >> 16) & 0xFF, (h1 >> 8) & 0xFF, h1 & 0xFF,
-      (h2 >> 24) & 0xFF, (h2 >> 16) & 0xFF, (h2 >> 8) & 0xFF, h2 & 0xFF,
-      (h3 >> 24) & 0xFF, (h3 >> 16) & 0xFF, (h3 >> 8) & 0xFF, h3 & 0xFF,
-      (h4 >> 24) & 0xFF, (h4 >> 16) & 0xFF, (h4 >> 8) & 0xFF, h4 & 0xFF,
+      (h1 >> 24) & 0xFF,
+      (h1 >> 16) & 0xFF,
+      (h1 >> 8) & 0xFF,
+      h1 & 0xFF,
+      (h2 >> 24) & 0xFF,
+      (h2 >> 16) & 0xFF,
+      (h2 >> 8) & 0xFF,
+      h2 & 0xFF,
+      (h3 >> 24) & 0xFF,
+      (h3 >> 16) & 0xFF,
+      (h3 >> 8) & 0xFF,
+      h3 & 0xFF,
+      (h4 >> 24) & 0xFF,
+      (h4 >> 16) & 0xFF,
+      (h4 >> 8) & 0xFF,
+      h4 & 0xFF,
     ];
   }
 
@@ -372,7 +384,8 @@ class AuthStateProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> signUp(String email, String password, {String? displayName}) async {
+  Future<bool> signUp(String email, String password,
+      {String? displayName}) async {
     _status = AuthStatus.authenticating;
     _errorMessage = null;
     notifyListeners();

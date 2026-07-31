@@ -58,35 +58,43 @@ CapabilityProfile _profile({
 void main() {
   group('Slope & Elevation Calculations', () {
     test('calculateSlopeDegrees returns 0 for flat terrain', () {
-      const p1 = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
-      const p2 = GpsCoordinate(latitude: 12.001, longitude: 77.0, altitudeMeters: 100);
+      const p1 =
+          GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
+      const p2 =
+          GpsCoordinate(latitude: 12.001, longitude: 77.0, altitudeMeters: 100);
       expect(GeodeticCalculator.calculateSlopeDegrees(p1, p2), equals(0.0));
     });
 
     test('calculateSlopeDegrees returns ~45 for equal rise and run', () {
-      const p1 = GpsCoordinate(latitude: 0.0, longitude: 0.0, altitudeMeters: 0);
-      const p2 = GpsCoordinate(latitude: 0.0009, longitude: 0.0, altitudeMeters: 100);
+      const p1 =
+          GpsCoordinate(latitude: 0.0, longitude: 0.0, altitudeMeters: 0);
+      const p2 =
+          GpsCoordinate(latitude: 0.0009, longitude: 0.0, altitudeMeters: 100);
       final slope = GeodeticCalculator.calculateSlopeDegrees(p1, p2);
       expect(slope, greaterThan(40));
       expect(slope, lessThan(50));
     });
 
     test('calculateSlopePercent returns 0 for flat terrain', () {
-      const p1 = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 50);
-      const p2 = GpsCoordinate(latitude: 12.01, longitude: 77.0, altitudeMeters: 50);
+      const p1 =
+          GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 50);
+      const p2 =
+          GpsCoordinate(latitude: 12.01, longitude: 77.0, altitudeMeters: 50);
       expect(GeodeticCalculator.calculateSlopePercent(p1, p2), equals(0.0));
     });
 
     test('calculateElevationDifference positive when ascending', () {
       const p1 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100);
       const p2 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 250);
-      expect(GeodeticCalculator.calculateElevationDifference(p1, p2), equals(150.0));
+      expect(GeodeticCalculator.calculateElevationDifference(p1, p2),
+          equals(150.0));
     });
 
     test('calculateElevationDifference negative when descending', () {
       const p1 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 250);
       const p2 = GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100);
-      expect(GeodeticCalculator.calculateElevationDifference(p1, p2), equals(-150.0));
+      expect(GeodeticCalculator.calculateElevationDifference(p1, p2),
+          equals(-150.0));
     });
 
     test('calculateElevationGain sums only positive deltas', () {
@@ -100,7 +108,9 @@ void main() {
     });
 
     test('calculateElevationGain returns 0 for single point', () {
-      final path = [const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100)];
+      final path = [
+        const GpsCoordinate(latitude: 0, longitude: 0, altitudeMeters: 100)
+      ];
       expect(GeodeticCalculator.calculateElevationGain(path), equals(0.0));
     });
 
@@ -117,7 +127,8 @@ void main() {
     });
 
     test('calculateSlopeDegrees returns 0 for same point', () {
-      const p = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
+      const p =
+          GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
       expect(GeodeticCalculator.calculateSlopeDegrees(p, p), equals(0.0));
     });
   });
@@ -143,9 +154,14 @@ void main() {
 
     test('engineConfidence contains all available engines', () {
       final profile = _profile(
-        lidar: true, depth: true, arCore: true,
-        camera: true, gps: true, compass: true,
-        gyroscope: true, accelerometer: true,
+        lidar: true,
+        depth: true,
+        arCore: true,
+        camera: true,
+        gps: true,
+        compass: true,
+        gyroscope: true,
+        accelerometer: true,
       );
       final conf = profile.engineConfidence;
       expect(conf.containsKey(MeasurementAlgorithm.lidar), isTrue);
@@ -166,10 +182,10 @@ void main() {
     });
 
     test('high accuracy boosts GPS confidence', () {
-      final medium = _profile(
-          gps: true, compass: true, accuracy: HardwareAccuracy.medium);
-      final high = _profile(
-          gps: true, compass: true, accuracy: HardwareAccuracy.high);
+      final medium =
+          _profile(gps: true, compass: true, accuracy: HardwareAccuracy.medium);
+      final high =
+          _profile(gps: true, compass: true, accuracy: HardwareAccuracy.high);
       expect(
         high.engineConfidence[MeasurementAlgorithm.gpsImu]!,
         greaterThan(medium.engineConfidence[MeasurementAlgorithm.gpsImu]!),
@@ -187,9 +203,12 @@ void main() {
       final report = InspectionReport(
         siteName: 'Test Site',
         items: [
-          InspectionItem(category: 'A', item: 'X', status: InspectionStatus.pass),
-          InspectionItem(category: 'A', item: 'Y', status: InspectionStatus.pass),
-          InspectionItem(category: 'B', item: 'Z', status: InspectionStatus.fail),
+          InspectionItem(
+              category: 'A', item: 'X', status: InspectionStatus.pass),
+          InspectionItem(
+              category: 'A', item: 'Y', status: InspectionStatus.pass),
+          InspectionItem(
+              category: 'B', item: 'Z', status: InspectionStatus.fail),
         ],
       );
       expect(report.passRate, closeTo(66.67, 0.1));
@@ -201,10 +220,18 @@ void main() {
       final report = InventoryReport(
         siteName: 'Warehouse',
         items: [
-          InventoryItem(name: 'Box A', quantity: 10,
-              unitLengthM: 0.5, unitWidthM: 0.5, unitHeightM: 0.5),
-          InventoryItem(name: 'Box B', quantity: 5,
-              unitLengthM: 1.0, unitWidthM: 1.0, unitHeightM: 1.0),
+          InventoryItem(
+              name: 'Box A',
+              quantity: 10,
+              unitLengthM: 0.5,
+              unitWidthM: 0.5,
+              unitHeightM: 0.5),
+          InventoryItem(
+              name: 'Box B',
+              quantity: 5,
+              unitLengthM: 1.0,
+              unitWidthM: 1.0,
+              unitHeightM: 1.0),
         ],
       );
       expect(report.totalItemCount, equals(15));

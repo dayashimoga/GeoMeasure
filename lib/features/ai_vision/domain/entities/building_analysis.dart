@@ -84,40 +84,30 @@ class BuildingAnalysis {
         'perimeterMeters': perimeterMeters,
       };
 
-  factory BuildingAnalysis.fromJson(Map<String, dynamic> m) =>
-      BuildingAnalysis(
+  factory BuildingAnalysis.fromJson(Map<String, dynamic> m) => BuildingAnalysis(
         lengthMeters: (m['lengthMeters'] as num).toDouble(),
         widthMeters: (m['widthMeters'] as num).toDouble(),
         heightMeters: (m['heightMeters'] as num).toDouble(),
         numberOfFloors: m['numberOfFloors'] as int,
-        floorHeightMeters:
-            (m['floorHeightMeters'] as num?)?.toDouble() ?? 3.0,
+        floorHeightMeters: (m['floorHeightMeters'] as num?)?.toDouble() ?? 3.0,
         roofType: RoofType.values.firstWhere(
           (e) => e.name == (m['roofType'] as String?),
           orElse: () => RoofType.flat,
         ),
-        roofPitchDegrees:
-            (m['roofPitchDegrees'] as num?)?.toDouble() ?? 0.0,
+        roofPitchDegrees: (m['roofPitchDegrees'] as num?)?.toDouble() ?? 0.0,
         roofAreaSqm: (m['roofAreaSqm'] as num?)?.toDouble() ?? 0.0,
         windowCount: m['windowCount'] as int? ?? 0,
         doorCount: m['doorCount'] as int? ?? 0,
-        footprintAreaSqm:
-            (m['footprintAreaSqm'] as num?)?.toDouble() ?? 0.0,
-        totalFloorAreaSqm:
-            (m['totalFloorAreaSqm'] as num?)?.toDouble() ?? 0.0,
-        builtUpAreaSqm:
-            (m['builtUpAreaSqm'] as num?)?.toDouble() ?? 0.0,
-        totalWallAreaSqm:
-            (m['totalWallAreaSqm'] as num?)?.toDouble() ?? 0.0,
+        footprintAreaSqm: (m['footprintAreaSqm'] as num?)?.toDouble() ?? 0.0,
+        totalFloorAreaSqm: (m['totalFloorAreaSqm'] as num?)?.toDouble() ?? 0.0,
+        builtUpAreaSqm: (m['builtUpAreaSqm'] as num?)?.toDouble() ?? 0.0,
+        totalWallAreaSqm: (m['totalWallAreaSqm'] as num?)?.toDouble() ?? 0.0,
         openAreaSqm: (m['openAreaSqm'] as num?)?.toDouble() ?? 0.0,
-        parkingAreaSqm:
-            (m['parkingAreaSqm'] as num?)?.toDouble() ?? 0.0,
+        parkingAreaSqm: (m['parkingAreaSqm'] as num?)?.toDouble() ?? 0.0,
         plotAreaSqm: (m['plotAreaSqm'] as num?)?.toDouble() ?? 0.0,
-        floorAreaRatio:
-            (m['floorAreaRatio'] as num?)?.toDouble() ?? 0.0,
+        floorAreaRatio: (m['floorAreaRatio'] as num?)?.toDouble() ?? 0.0,
         plotCoverage: (m['plotCoverage'] as num?)?.toDouble() ?? 0.0,
-        perimeterMeters:
-            (m['perimeterMeters'] as num?)?.toDouble() ?? 0.0,
+        perimeterMeters: (m['perimeterMeters'] as num?)?.toDouble() ?? 0.0,
       );
 }
 
@@ -183,8 +173,7 @@ class BuildingAnalyzer {
   }
 
   /// Estimate floor count from total height and assumed floor height.
-  static int estimateFloors(double totalHeight,
-          {double floorHeight = 3.0}) =>
+  static int estimateFloors(double totalHeight, {double floorHeight = 3.0}) =>
       (totalHeight / floorHeight).round().clamp(1, 200);
 
   /// Calculate floor area ratio.

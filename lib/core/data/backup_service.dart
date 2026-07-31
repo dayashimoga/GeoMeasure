@@ -44,8 +44,7 @@ class BackupService {
   static Future<BackupResult> importFromFile(String filePath) async {
     final file = File(filePath);
     if (!await file.exists()) {
-      return BackupResult(
-          success: false, message: 'File not found: $filePath');
+      return BackupResult(success: false, message: 'File not found: $filePath');
     }
 
     try {

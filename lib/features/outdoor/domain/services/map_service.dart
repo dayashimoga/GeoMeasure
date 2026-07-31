@@ -34,8 +34,7 @@ class OsmTileProvider implements MapTileProvider {
       'https://tile.openstreetmap.org/$z/$x/$y.png';
 
   @override
-  String get attribution =>
-      '© OpenStreetMap contributors';
+  String get attribution => '© OpenStreetMap contributors';
 
   @override
   int get maxZoom => 19;
@@ -54,8 +53,7 @@ class OpenTopoMapProvider implements MapTileProvider {
       'https://tile.opentopomap.org/$z/$x/$y.png';
 
   @override
-  String get attribution =>
-      '© OpenTopoMap (CC-BY-SA)';
+  String get attribution => '© OpenTopoMap (CC-BY-SA)';
 
   @override
   int get maxZoom => 17;
@@ -75,8 +73,7 @@ class EsriSatelliteProvider implements MapTileProvider {
       'World_Imagery/MapServer/tile/$z/$y/$x';
 
   @override
-  String get attribution =>
-      '© Esri, Maxar, Earthstar Geographics';
+  String get attribution => '© Esri, Maxar, Earthstar Geographics';
 
   @override
   int get maxZoom => 18;
@@ -141,8 +138,9 @@ class MapService {
   static int _latToTileY(double lat, int zoom) {
     final latRad = lat * 3.14159265358979 / 180.0;
     final n = 1 << zoom;
-    return ((1.0 - _ln(_tan(latRad) + 1.0 / _cos(latRad)) /
-                3.14159265358979) / 2.0 * n)
+    return ((1.0 - _ln(_tan(latRad) + 1.0 / _cos(latRad)) / 3.14159265358979) /
+            2.0 *
+            n)
         .floor();
   }
 
@@ -189,8 +187,8 @@ class MapService {
       return (x > 0 ? 1 : -1) * (3.14159265358979 / 2 - _atan(1 / x.abs()));
     }
     final x2 = x * x;
-    return x * (1 - x2 / 3 + x2 * x2 / 5 - x2 * x2 * x2 / 7 +
-        x2 * x2 * x2 * x2 / 9);
+    return x *
+        (1 - x2 / 3 + x2 * x2 / 5 - x2 * x2 * x2 / 7 + x2 * x2 * x2 * x2 / 9);
   }
 
   static double _sinh(double x) {

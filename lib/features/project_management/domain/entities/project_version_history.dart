@@ -32,8 +32,7 @@ class ProjectVersionHistory {
   }
 
   /// Get the latest snapshot.
-  ProjectSnapshot? get latest =>
-      _snapshots.isEmpty ? null : _snapshots.last;
+  ProjectSnapshot? get latest => _snapshots.isEmpty ? null : _snapshots.last;
 
   /// Compare two versions and return the diff keys.
   List<String> diffKeys(int versionA, int versionB) {

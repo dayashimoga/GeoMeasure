@@ -52,8 +52,8 @@ void main() {
   group('SphereShape', () {
     test('volume = 4/3 πr³', () {
       const s = SphereShape(radiusMeters: 3);
-      expect(s.calculateVolumeInCubicMeters(),
-          closeTo(4.0 / 3.0 * pi * 27, 0.01));
+      expect(
+          s.calculateVolumeInCubicMeters(), closeTo(4.0 / 3.0 * pi * 27, 0.01));
     });
 
     test('surface area = 4πr²', () {
@@ -92,8 +92,7 @@ void main() {
   group('ConeShape', () {
     test('volume = 1/3 πr²h', () {
       const c = ConeShape(radiusMeters: 3, heightMeters: 6);
-      expect(c.calculateVolumeInCubicMeters(),
-          closeTo(pi * 9 * 6 / 3, 0.01));
+      expect(c.calculateVolumeInCubicMeters(), closeTo(pi * 9 * 6 / 3, 0.01));
     });
 
     test('slant height', () {
@@ -187,8 +186,8 @@ void main() {
         spanMeters: 8,
         riseMeters: 3,
       );
-      expect(roof.calculateAreaInSquareMeters(),
-          greaterThan(roof.planArea * 0.9));
+      expect(
+          roof.calculateAreaInSquareMeters(), greaterThan(roof.planArea * 0.9));
     });
   });
 
@@ -295,13 +294,11 @@ void main() {
     test('fast is less accurate than highAccuracy', () {
       final fast = PrecisionConfig.forMode(PrecisionMode.fast);
       final high = PrecisionConfig.forMode(PrecisionMode.highAccuracy);
-      expect(fast.accuracyTargetMeters,
-          greaterThan(high.accuracyTargetMeters));
+      expect(fast.accuracyTargetMeters, greaterThan(high.accuracyTargetMeters));
     });
 
     test('professional requires external hardware', () {
-      final pro =
-          PrecisionConfig.forMode(PrecisionMode.professionalSurvey);
+      final pro = PrecisionConfig.forMode(PrecisionMode.professionalSurvey);
       expect(pro.requiresExternalHardware, true);
     });
   });
@@ -412,8 +409,7 @@ void main() {
         label: 'car',
         category: ObjectCategory.car,
         confidence: 0.92,
-        boundingBox:
-            BoundingBox(left: 0.1, top: 0.2, right: 0.5, bottom: 0.8),
+        boundingBox: BoundingBox(left: 0.1, top: 0.2, right: 0.5, bottom: 0.8),
         estimatedWidthMeters: 1.8,
         estimatedHeightMeters: 1.5,
       );
@@ -434,8 +430,7 @@ void main() {
             label: 'car',
             category: ObjectCategory.car,
             confidence: 0.9,
-            boundingBox:
-                BoundingBox(left: 0, top: 0, right: 0.3, bottom: 0.3),
+            boundingBox: BoundingBox(left: 0, top: 0, right: 0.3, bottom: 0.3),
           ),
           // Duplicate (high IoU with above)
           const DetectedObject(
@@ -460,11 +455,13 @@ void main() {
       );
 
       final counts = result.countByCategory();
-      final carCount = counts.firstWhere((c) => c.category == ObjectCategory.car);
+      final carCount =
+          counts.firstWhere((c) => c.category == ObjectCategory.car);
       expect(carCount.count, 1); // Duplicate removed
       expect(carCount.duplicatesRemoved, 1);
 
-      final treeCount = counts.firstWhere((c) => c.category == ObjectCategory.tree);
+      final treeCount =
+          counts.firstWhere((c) => c.category == ObjectCategory.tree);
       expect(treeCount.count, 1);
     });
   });
@@ -478,8 +475,7 @@ void main() {
             label: 'chair',
             category: ObjectCategory.chair,
             confidence: 0.8,
-            boundingBox:
-                BoundingBox(left: 0, top: 0, right: 0.2, bottom: 0.2),
+            boundingBox: BoundingBox(left: 0, top: 0, right: 0.2, bottom: 0.2),
           ),
           const DetectedObject(
             label: 'chair',
@@ -517,8 +513,7 @@ void main() {
 
   group('BuildingAnalyzer', () {
     test('basic building analysis', () {
-      const footprint =
-          RectangleShape(lengthMeters: 20, widthMeters: 15);
+      const footprint = RectangleShape(lengthMeters: 20, widthMeters: 15);
       const building = BuildingShape(
         baseFootprint: footprint,
         numberOfFloors: 4,
@@ -625,8 +620,7 @@ void main() {
   group('EdgeDetector', () {
     test('Sobel detects vertical edge', () {
       // 10×10 image: left half black, right half white
-      final gray = List<int>.generate(
-          100, (i) => (i % 10) < 5 ? 0 : 255);
+      final gray = List<int>.generate(100, (i) => (i % 10) < 5 ? 0 : 255);
       final edges = EdgeDetector.detectEdgesSobel(gray, 10, 10);
       // Edges should be strongest at x=5 (boundary)
       // Check middle row (y=5)
@@ -654,8 +648,7 @@ void main() {
       for (int x = 0; x < 10; x++) {
         edges[5 * 10 + x] = 255;
       }
-      final lines =
-          EdgeDetector.detectLines(edges, 10, 10, minLength: 5);
+      final lines = EdgeDetector.detectLines(edges, 10, 10, minLength: 5);
       expect(lines.any((l) => l.isHorizontal), true);
     });
 
@@ -686,15 +679,9 @@ void main() {
       final takeoff = MaterialEstimator.estimateForRoom(room);
       expect(takeoff.items.length, 7);
       expect(
-          takeoff.items
-              .any((i) => i.material == MaterialType.concrete),
-          true);
-      expect(
-          takeoff.items.any((i) => i.material == MaterialType.brick),
-          true);
-      expect(
-          takeoff.items.any((i) => i.material == MaterialType.paint),
-          true);
+          takeoff.items.any((i) => i.material == MaterialType.concrete), true);
+      expect(takeoff.items.any((i) => i.material == MaterialType.brick), true);
+      expect(takeoff.items.any((i) => i.material == MaterialType.paint), true);
     });
 
     test('wastage adjustment', () {
@@ -901,8 +888,7 @@ void main() {
     test('JSON format has correct extension and MIME', () {
       expect(ExportManager.fileExtension(ExportFormat.json), '.json');
       expect(ExportManager.mimeType(ExportFormat.json), 'application/json');
-      expect(
-          ExportManager.formatDisplayName(ExportFormat.json), 'JSON Data');
+      expect(ExportManager.formatDisplayName(ExportFormat.json), 'JSON Data');
     });
 
     test('JSON always in supported formats', () {
@@ -954,8 +940,7 @@ void main() {
     test('label image returns brightness label', () async {
       final svc = LocalVisionService();
       // Bright image
-      final bright = Uint8List.fromList(
-          List.generate(4 * 4, (_) => 230));
+      final bright = Uint8List.fromList(List.generate(4 * 4, (_) => 230));
       final labels = await svc.labelImage(bright, 1, 1);
       expect(labels, isNotEmpty);
     });
@@ -1199,7 +1184,8 @@ void main() {
         }
       }
       final corners = PhotogrammetryPipeline.detectFastCornersPublic(
-          gray, 50, 50, threshold: 10);
+          gray, 50, 50,
+          threshold: 10);
       // The bright dot is an isolated feature — FAST should detect it
       expect(corners, isNotEmpty);
     });
@@ -1245,7 +1231,7 @@ void main() {
       final img = Uint8List(10 * 10 * 4);
       // Set RGBA pixels: R=220 (above 200 threshold for bright_scene)
       for (int i = 0; i < 10 * 10; i++) {
-        img[i * 4] = 220;     // R
+        img[i * 4] = 220; // R
         img[i * 4 + 1] = 220; // G
         img[i * 4 + 2] = 220; // B
         img[i * 4 + 3] = 255; // A
@@ -1322,8 +1308,7 @@ void main() {
       final config = AppConfig();
       final flags = config.allFlags;
       expect(flags, isA<Map<String, bool>>());
-      expect(() => flags['test'] = true,
-          throwsUnsupportedError);
+      expect(() => flags['test'] = true, throwsUnsupportedError);
     });
 
     test('constants are production-grade', () {
@@ -1336,4 +1321,3 @@ void main() {
     });
   });
 }
-

@@ -21,13 +21,27 @@ class CameraMeasurementPage extends StatefulWidget {
 class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
   final CameraProvider _cameraProvider = CameraProvider();
   bool _showDimensionOverlay = false;
-  final _lengthCtrl = TextEditingController(text: '3.0');
-  final _widthCtrl = TextEditingController(text: '2.5');
+  bool _showCalibrationOverlay = false;
+  final _lengthCtrl = TextEditingController();
+  final _widthCtrl = TextEditingController();
+  final _refPixelCtrl = TextEditingController();
+
+  // Reference object calibration
+  double? _pixelsPerMeter;
+  String _selectedRefObject = 'Credit Card';
+  static const Map<String, double> _refObjectSizes = {
+    'Credit Card': 0.0856, // 85.6mm width
+    'A4 Paper': 0.297, // 297mm height
+    'US Letter': 0.2794, // 279.4mm height
+    'US Dollar Bill': 0.1562, // 156.2mm width
+    'Custom': 0.0,
+  };
 
   @override
   void dispose() {
     _lengthCtrl.dispose();
     _widthCtrl.dispose();
+    _refPixelCtrl.dispose();
     super.dispose();
   }
 
@@ -35,16 +49,16 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
   int get _selectedIndex {
     final sel = _cameraProvider.selectedPhoto;
     if (sel == null) return 0;
-    final idx = _cameraProvider.photos.indexWhere(
-        (p) => p.filePath == sel.filePath);
+    final idx =
+        _cameraProvider.photos.indexWhere((p) => p.filePath == sel.filePath);
     return idx >= 0 ? idx : 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final algoColor = AppTheme.algorithmColor(
-        widget.profile.bestAlgorithm.name);
+    final algoColor =
+        AppTheme.algorithmColor(widget.profile.bestAlgorithm.name);
 
     return Scaffold(
       appBar: AppBar(
@@ -108,6 +122,8 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                     ),
                     if (_showDimensionOverlay)
                       _buildDimensionOverlay(theme, algoColor),
+                    if (_showCalibrationOverlay)
+                      _buildCalibrationOverlay(theme),
                     Positioned(
                       top: 12,
                       right: 12,
@@ -115,8 +131,8 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surface
-                              .withValues(alpha: 0.9),
+                          color:
+                              theme.colorScheme.surface.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                               color: algoColor.withValues(alpha: 0.3)),
@@ -142,8 +158,7 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                 ),
               ),
               _buildControls(theme),
-              if (photos.length > 1)
-                _buildPhotoStrip(theme, photos, selected),
+              if (photos.length > 1) _buildPhotoStrip(theme, photos, selected),
             ],
           );
         },
@@ -174,8 +189,7 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                 ),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.camera_alt_rounded,
-                  size: 64, color: algoColor),
+              child: Icon(Icons.camera_alt_rounded, size: 64, color: algoColor),
             ),
             const SizedBox(height: 24),
             Text(
@@ -276,6 +290,7 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Length (m)',
+                      hintText: 'e.g. 4.5',
                       prefixIcon: Icon(Icons.straighten_rounded, size: 20),
                       border: OutlineInputBorder(),
                       isDense: true,
@@ -288,12 +303,22 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Width (m)',
+                      hintText: 'e.g. 3.0',
                       prefixIcon: Icon(Icons.straighten_rounded, size: 20),
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tip: Place a credit card (85.6×54mm) in frame for scale reference.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -307,8 +332,18 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                         icon: const Icon(Icons.calculate_rounded, size: 18),
                         label: const Text('Calculate'),
                         onPressed: () {
-                          final l = double.tryParse(_lengthCtrl.text) ?? 3.0;
-                          final w = double.tryParse(_widthCtrl.text) ?? 2.5;
+                          final l = double.tryParse(_lengthCtrl.text);
+                          final w = double.tryParse(_widthCtrl.text);
+                          if (l == null || w == null || l <= 0 || w <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Please enter valid positive dimensions'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
                           _addAnnotationAndMeasure(l, w);
                         },
                       ),
@@ -335,12 +370,20 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
       child: Row(
         children: [
           OutlinedButton.icon(
-            onPressed: () =>
-                setState(() => _showDimensionOverlay = true),
+            onPressed: () => setState(() => _showDimensionOverlay = true),
             icon: const Icon(Icons.add_rounded, size: 18),
             label: const Text('Add Dimension'),
           ),
           const SizedBox(width: 8),
+          OutlinedButton.icon(
+            onPressed: () => setState(() => _showCalibrationOverlay = true),
+            icon: Icon(Icons.straighten_rounded,
+                size: 18,
+                color:
+                    _pixelsPerMeter != null ? const Color(0xFF10B981) : null),
+            label: Text(_pixelsPerMeter != null ? 'Recalibrate' : 'Calibrate'),
+          ),
+          const Spacer(),
           OutlinedButton.icon(
             onPressed: _cameraProvider.photos.isNotEmpty
                 ? () => _cameraProvider.removePhoto(_selectedIndex)
@@ -375,8 +418,7 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
                     : theme.colorScheme.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(8),
                 border: isSelected
-                    ? Border.all(
-                        color: theme.colorScheme.primary, width: 2)
+                    ? Border.all(color: theme.colorScheme.primary, width: 2)
                     : null,
               ),
               child: Center(
@@ -391,6 +433,138 @@ class _CameraMeasurementPageState extends State<CameraMeasurementPage> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildCalibrationOverlay(ThemeData theme) {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.3),
+        child: Center(
+          child: Card(
+            margin: const EdgeInsets.all(24),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.straighten_rounded,
+                          color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Reference Object Calibration',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Place a known object in frame and enter its pixel width to calibrate measurements.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedRefObject,
+                    decoration: const InputDecoration(
+                      labelText: 'Reference Object',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: _refObjectSizes.keys
+                        .map((k) => DropdownMenuItem(
+                              value: k,
+                              child: Text(k),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _selectedRefObject = v);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  if (_selectedRefObject != 'Custom')
+                    Text(
+                      'Known size: ${(_refObjectSizes[_selectedRefObject]! * 1000).toStringAsFixed(1)} mm',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _refPixelCtrl,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Pixel width of object in image',
+                      hintText: 'e.g. 320',
+                      prefixIcon:
+                          Icon(Icons.photo_size_select_large_rounded, size: 20),
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () =>
+                            setState(() => _showCalibrationOverlay = false),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: const Text('Calibrate'),
+                        onPressed: () {
+                          final pixels = double.tryParse(_refPixelCtrl.text);
+                          final refSize = _refObjectSizes[_selectedRefObject];
+                          if (pixels == null ||
+                              pixels <= 0 ||
+                              refSize == null ||
+                              refSize <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Enter valid pixel width'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+                          setState(() {
+                            _pixelsPerMeter = pixels / refSize;
+                            _showCalibrationOverlay = false;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Calibrated: ${_pixelsPerMeter!.toStringAsFixed(0)} px/m '
+                                '(1 px ≈ ${(1000 / _pixelsPerMeter!).toStringAsFixed(2)} mm)',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

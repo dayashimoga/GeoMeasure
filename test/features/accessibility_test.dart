@@ -105,7 +105,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('large text does not cause render overflow in card', (tester) async {
+    testWidgets('large text does not cause render overflow in card',
+        (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),

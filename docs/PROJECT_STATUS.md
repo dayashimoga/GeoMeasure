@@ -1,124 +1,141 @@
 # Project Status
 
-**Version**: 2.8.0+18 | **Date**: 2026-07-28 | **Tests**: 407/407 passing
+**Version**: 2.3.0+9 | **Date**: 2026-07-29 | **Audit**: Full Gap Analysis Completed
 
 ## Build Status
 
-| Platform | Status | Command |
-|----------|--------|---------|
+| Platform | Status | Notes |
+|----------|--------|-------|
 | Web | ✅ Passes | `flutter build web` |
-| Android | ✅ CI builds | `flutter build apk` |
-| iOS | ⚠️ Config ready (requires macOS + Xcode) | `flutter build ios` |
-| Analysis | ✅ 0 errors, 0 warnings | `flutter analyze` |
-| Tests | ✅ 407/407 | `flutter test` |
-| Docker | ✅ All services functional | `docker compose run app-ci` |
+| Android | ✅ Builds | `flutter build apk --debug` |
+| iOS | ⚠️ Config ready | Requires macOS + Xcode |
+| Analysis | ✅ 0 errors | `flutter analyze` |
+| Docker | ✅ Functional | `docker compose run app-ci` |
 
-## Overall Completion: ~90%
+## Overall Production Readiness: ~33%
+
+> **Note**: Previous status claimed ~90% completion. After thorough audit, true
+> production readiness is ~33%. The codebase has a solid architecture skeleton
+> but nearly all "measurement" features are manual text-input calculators,
+> not real sensor-driven measurement engines.
 
 ## Feature Completion Matrix
 
-### Core Measurement Engine — ✅ Complete
+### Core Measurement Engine — 🟡 Partial (Math Only)
 
-| Feature | Status | Tests |
+| Feature | Status | Notes |
 |---------|--------|-------|
-| 25 spatial shape types | ✅ | 40+ |
-| Geodetic calculator (Vincenty/Haversine) | ✅ | 8 |
-| Unit converter (distance + area) | ✅ | 12 |
-| Algorithm selector (6 strategies) | ✅ | 4 |
-| 7 precision modes | ✅ | 3 |
-| Sensor fusion (9 sensor types) | ✅ | 6 |
-| Measurement validation (5 grades) | ✅ | 3 |
+| 25+ spatial shape types | ✅ Math correct | Area/volume/perimeter calculations work |
+| Geodetic calculator (Vincenty/Haversine) | ✅ Complete | GPS distance/area calculations verified |
+| Unit converter (distance + area) | ✅ Complete | Missing regional land units (Bigha, Guntha) |
+| Algorithm selector (6 strategies) | 🚫 Placeholder | Selects algorithm but never triggers real engines |
+| 7 precision modes | 🚫 Placeholder | Defined but not used in any pipeline |
+| Sensor fusion (9 types) | 🟡 Partial | Weighted fusion code exists, not connected to sensors |
+| Actual sensor-driven measurement | ❌ Missing | All measurements use manual text input dialogs |
+
+### Measurement Modes — 🔴 Mostly Placeholder
+
+| Mode | Status | Notes |
+|------|--------|-------|
+| Room measurement | 🚫 Placeholder | Dialog with hardcoded defaults (6.0 × 4.5 × 3.0) |
+| Wall measurement | 🚫 Placeholder | Dialog with hardcoded defaults (6.0 × 3.0) |
+| Object measurement | 🚫 Placeholder | Dialog with hardcoded defaults (2.0 × 1.5 × 1.0) |
+| Building measurement | 🚫 Placeholder | Dialog with hardcoded defaults (20.0 × 15.0 × 3 floors) |
+| Land GPS measurement | ⚠️ Bug | Uses hardcoded San Francisco coordinates, not real GPS |
+| LiDAR room scan | ❌ Missing | No LiDAR SDK integrated |
+| Depth sensor measurement | ❌ Missing | No Camera2/depth API |
+| AR measurement | 🚫 Placeholder | Interface + ManualArEngine only, no native binding |
+| Visual SLAM | ❌ Missing | Not implemented |
+| AI monocular depth | ❌ Missing | Not implemented |
+| Camera AI measurement | ❌ Missing | Photo capture exists but no measurement pipeline |
 
 ### Export System — ✅ Complete
 
-| Format | Status | Tests |
+| Format | Status |
+|--------|--------|
+| PDF (6 templates) | ✅ |
+| DXF (AutoCAD) | ✅ |
+| CSV | ✅ |
+| SVG | ✅ |
+| GeoJSON | ✅ |
+| KML (Google Earth) | ✅ |
+| JSON | ✅ |
+| Excel (.xlsx) | ✅ |
+
+### AI Vision — 🟡 Scaffolded (Pure Dart Only)
+
+| Feature | Status | Notes |
 |---------|--------|-------|
-| DXF | ✅ | 2 |
-| CSV | ✅ | 2 |
-| GeoJSON | ✅ | 2 |
-| SVG | ✅ | 2 |
-| KML | ✅ | 2 |
-| PDF (6 templates) | ✅ | 2 |
-| JSON | ✅ | 3 |
-| Excel (.xlsx) | ✅ | 3 |
+| Sobel/Harris/FAST edge/corner detection | ✅ Pure Dart | Cross-platform but basic |
+| Line detection | ✅ Pure Dart | |
+| NCC feature matching | ✅ Pure Dart | |
+| Photogrammetry pipeline | 🟡 Partial | DLT triangulation stub |
+| Object counter (NMS) | ✅ | |
+| ML Kit integration | ❌ Missing | Commented out in pubspec.yaml |
+| OCR / QR / Barcode | ❌ Missing | ML Kit commented out |
+| Semantic segmentation | ❌ Missing | Not implemented |
 
-### AI Vision — ✅ Core Complete
+### Infrastructure — 🟡 Mixed
 
-| Feature | Status | Tests |
+| Feature | Status | Notes |
 |---------|--------|-------|
-| Sobel edge detection | ✅ Pure Dart | 1 |
-| Harris corner detection | ✅ Pure Dart | 1 |
-| Line detection | ✅ Pure Dart | 1 |
-| FAST corner detector | ✅ Pure Dart | 1 |
-| NCC feature matching | ✅ Pure Dart | — |
-| DLT triangulation | ✅ Pure Dart | — |
-| Photogrammetry pipeline | ✅ Pure Dart | 5 |
-| Object counter (NMS) | ✅ | 2 |
-| Vision service factory | ✅ | 1 |
-| ML Kit integration | ⚠️ Scaffold only | — |
+| Hive local storage | ✅ | Offline-first data persistence |
+| Project management CRUD | ✅ | Create, list, search, delete |
+| GPS tracking service | ✅ | Real geolocator integration |
+| Camera service | ✅ | image_picker integration |
+| AR engine interface | 🚫 Placeholder | No native ARCore/ARKit binding |
+| Cloud sync | 🚫 Placeholder | Interface only, no backend |
+| Undo/redo | ✅ | CommandManager working |
+| Feature flags | ✅ | AppConfig system |
+| Backup/restore | 🟡 Partial | Backup works, restore is dialog-only |
+| Encrypted storage | ✅ | SecureStorage service |
 
-### Material Estimation — ✅ Complete
+### Presentation — 🟡 Needs Overhaul
 
-| Feature | Status | Tests |
+| Feature | Status | Notes |
 |---------|--------|-------|
-| 15 material types | ✅ | 6 |
-| Quantity take-offs | ✅ | 2 |
-| Cost estimation | ✅ | 2 |
+| Material 3 theming | ✅ | Light/dark with custom palette |
+| Onboarding | ✅ | 4-slide walkthrough |
+| Dashboard | ⚠️ | 1540-line monolith, calculator workflow |
+| Measurement history | ✅ | |
+| GPS tracking page | ✅ | Real GPS with waypoints |
+| Floor plan canvas | ✅ | 2D blueprint rendering |
+| Hardware diagnostics | ✅ | Moved to Settings bottom sheet |
+| Guided measurement flow | ❌ Missing | No camera→scan→measure→review workflow |
+| Responsive layouts | 🟡 Partial | Basic isWide > 720 only |
+| Settings page | 🔁 Duplicate | settings_page.dart AND inline settings tab |
 
-### Infrastructure — ✅ Complete
+### CI/CD & DevOps — ✅ Good
 
 | Feature | Status |
 |---------|--------|
-| Firebase auth | ✅ |
-| GPS tracking (geolocator) | ✅ |
-| Camera (image_picker) | ✅ |
-| AR engine interface | ✅ Interface defined |
-| Cloud sync interface | ✅ Interface defined |
-| Hive local storage | ✅ |
-| Encrypted secure storage | ✅ |
-| Project management | ✅ |
-| Undo/redo command manager | ✅ |
-| Feature flags system | ✅ |
-
-### Presentation — ✅ Consumer Production Ready
-
-| Feature | Status | Tests |
-|---------|--------|-------|
-| Consumer M3 Dashboard with Auto Engine Banner | ✅ Production | 50+ widget tests |
-| Measurement history page | ✅ | — |
-| GPS tracking page | ✅ | — |
-| Floor plan blueprint canvas | ✅ | — |
-| Hardware Diagnostics bottom sheet modal | ✅ | — |
-| Light/dark theme | ✅ | — |
-
-## Production Readiness Assessment
-
-| Category | Rating | Notes |
-|----------|--------|-------|
-| Core measurement logic | 🟢 Production | All shapes tested, geodetics verified |
-| Export system | 🟢 Production | 9 formats, all cross-platform |
-| Presentation / UI / UX | 🟢 Production | Material 3 consumer application, clean spacing |
-| AI vision (pure Dart) | 🟡 Beta | Works cross-platform, accuracy enhanced by ML Kit on mobile |
-| ML Kit integration | 🔴 Scaffold | Requires `google_mlkit_*` packages in pubspec for mobile native |
-| AR measurement | 🟡 Interface Ready | Fallback manual AR engine functional; native binding ready |
-| Cloud sync | 🔴 Interface only | Requires backend implementation |
-| Security | 🟢 Production | Encrypted storage & permissions handler functional |
+| GitHub Actions pipeline | ✅ Format, analyze, test, build |
+| Docker build environment | ✅ |
+| APK/AAB artifact upload | ✅ |
+| Web build | ✅ |
+| Secret scanning | 🟡 Basic grep |
+| Dependency audit | ✅ |
 
 ## Technical Debt
 
-1. **ServiceLocator** — Manual DI; consider migrating to `get_it` for lazy loading and testability
-2. **ML Kit dependencies** — Optional in `pubspec.yaml`; `MlKitVisionService` falls back to pure Dart vision
-3. **Integration tests** — `integration_test` directory scaffolded for end-to-end device testing
+1. **Dashboard monolith** — 1540-line file containing all UI, measurement, project, settings, and export logic
+2. **Manual DI** — ServiceLocator class; should migrate to get_it
+3. **Duplicate settings** — settings_page.dart AND dashboard inline settings tab
+4. **ML Kit commented out** — Prevents mobile AI features
+5. **Fake measurement pipeline** — All modes use text-input dialogs with hardcoded values
+6. **GPS Land bug** — Hardcoded San Francisco coordinates instead of real GPS data
+7. **No state management** — Raw ChangeNotifier everywhere
 
 ## Known Limitations
 
 - iOS builds require macOS with Xcode
-- AR features on hardware require Google Play Services (ARCore) or iOS 11+ (ARKit)
+- AR features require ARCore (Android) or ARKit (iOS) native plugins not yet integrated
 - Google Fonts requires network on first run; offline fallback enabled
+- Flutter SDK not in system PATH on some environments
 
 ## Next Milestones
 
-1. Connect native ARCore/ARKit platform channel bindings
-2. Implement live camera frame visual SLAM overlay
-3. Enforce 95%+ coverage threshold in CI/CD pipeline
-
+1. **Sprint 1**: Fix fake pipeline, wire real GPS to land mode, restructure dashboard
+2. **Sprint 2**: Camera reference-object measurement, ML Kit activation
+3. **Sprint 3**: Native AR platform channels (ARCore/ARKit)
+4. **Sprint 4**: Visual SLAM, depth sensor integration

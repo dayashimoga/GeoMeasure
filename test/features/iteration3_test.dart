@@ -168,16 +168,20 @@ void main() {
 
     test('MIME types are correct', () {
       expect(ExportManager.mimeType(ExportFormat.csv), 'text/csv');
-      expect(ExportManager.mimeType(ExportFormat.geoJson), 'application/geo+json');
-      expect(ExportManager.mimeType(ExportFormat.kml), 'application/vnd.google-earth.kml+xml');
+      expect(
+          ExportManager.mimeType(ExportFormat.geoJson), 'application/geo+json');
+      expect(ExportManager.mimeType(ExportFormat.kml),
+          'application/vnd.google-earth.kml+xml');
     });
 
     test('export to string generates valid content', () {
       const rect = RectangleShape(lengthMeters: 5, widthMeters: 3);
-      final dxf = ExportManager.exportToString(format: ExportFormat.dxf, shape: rect);
+      final dxf =
+          ExportManager.exportToString(format: ExportFormat.dxf, shape: rect);
       expect(dxf, contains('LINE'));
 
-      final svg = ExportManager.exportToString(format: ExportFormat.svg, shape: rect);
+      final svg =
+          ExportManager.exportToString(format: ExportFormat.svg, shape: rect);
       expect(svg, contains('<svg'));
     });
   });
@@ -237,12 +241,18 @@ void main() {
   group('SyncConflict', () {
     test('serverWins returns remote entity', () {
       final local = SyncableEntity(
-        id: 'c1', type: 'project', data: {'name': 'Local'},
-        modifiedAt: DateTime(2026, 7, 26, 10, 0), version: 1,
+        id: 'c1',
+        type: 'project',
+        data: {'name': 'Local'},
+        modifiedAt: DateTime(2026, 7, 26, 10, 0),
+        version: 1,
       );
       final remote = SyncableEntity(
-        id: 'c1', type: 'project', data: {'name': 'Remote'},
-        modifiedAt: DateTime(2026, 7, 26, 11, 0), version: 2,
+        id: 'c1',
+        type: 'project',
+        data: {'name': 'Remote'},
+        modifiedAt: DateTime(2026, 7, 26, 11, 0),
+        version: 2,
       );
       final conflict = SyncConflict(local: local, remote: remote);
       final resolved = conflict.resolve(ConflictStrategy.serverWins);
@@ -251,12 +261,18 @@ void main() {
 
     test('clientWins returns local entity with bumped version', () {
       final local = SyncableEntity(
-        id: 'c1', type: 'project', data: {'name': 'Local'},
-        modifiedAt: DateTime(2026, 7, 26, 12, 0), version: 1,
+        id: 'c1',
+        type: 'project',
+        data: {'name': 'Local'},
+        modifiedAt: DateTime(2026, 7, 26, 12, 0),
+        version: 1,
       );
       final remote = SyncableEntity(
-        id: 'c1', type: 'project', data: {'name': 'Remote'},
-        modifiedAt: DateTime(2026, 7, 26, 11, 0), version: 3,
+        id: 'c1',
+        type: 'project',
+        data: {'name': 'Remote'},
+        modifiedAt: DateTime(2026, 7, 26, 11, 0),
+        version: 3,
       );
       final conflict = SyncConflict(local: local, remote: remote);
       final resolved = conflict.resolve(ConflictStrategy.clientWins);
@@ -266,12 +282,18 @@ void main() {
 
     test('lastWriteWins picks most recent', () {
       final older = SyncableEntity(
-        id: 'c1', type: 'project', data: {'name': 'Older'},
-        modifiedAt: DateTime(2026, 7, 26, 10, 0), version: 1,
+        id: 'c1',
+        type: 'project',
+        data: {'name': 'Older'},
+        modifiedAt: DateTime(2026, 7, 26, 10, 0),
+        version: 1,
       );
       final newer = SyncableEntity(
-        id: 'c1', type: 'project', data: {'name': 'Newer'},
-        modifiedAt: DateTime(2026, 7, 26, 12, 0), version: 2,
+        id: 'c1',
+        type: 'project',
+        data: {'name': 'Newer'},
+        modifiedAt: DateTime(2026, 7, 26, 12, 0),
+        version: 2,
       );
       final conflict = SyncConflict(local: older, remote: newer);
       final resolved = conflict.resolve(ConflictStrategy.lastWriteWins);
@@ -297,7 +319,8 @@ void main() {
     });
 
     test('tile count estimation', () {
-      const bounds = GeoBounds(north: 37.8, south: 37.7, east: -122.3, west: -122.5);
+      const bounds =
+          GeoBounds(north: 37.8, south: 37.7, east: -122.3, west: -122.5);
       final count = bounds.estimateTileCount(14, 16);
       expect(count, greaterThan(0));
     });
@@ -321,7 +344,8 @@ void main() {
       final region = CachedRegion(
         id: 'r1',
         name: 'Downtown',
-        bounds: const GeoBounds(north: 37.8, south: 37.7, east: -122.3, west: -122.5),
+        bounds: const GeoBounds(
+            north: 37.8, south: 37.7, east: -122.3, west: -122.5),
         minZoom: 12,
         maxZoom: 17,
         tileCount: 250,
@@ -447,8 +471,8 @@ void main() {
 
     test('duplicate sign up rejected', () async {
       await authService.signUp(email: 'dup@geo.com', password: 'Pass1234Aa');
-      final result =
-          await authService.signUp(email: 'dup@geo.com', password: 'Pass1234Aa');
+      final result = await authService.signUp(
+          email: 'dup@geo.com', password: 'Pass1234Aa');
       expect(result.success, false);
       expect(result.errorMessage, contains('already exists'));
     });
@@ -499,7 +523,8 @@ void main() {
 
       expect(provider.anchors.length, 3);
       expect(provider.measurements.length, 2);
-      expect(provider.totalPerimeter, closeTo(7.0, 0.01)); // 3 + 4 = 7 (two segments)
+      expect(provider.totalPerimeter,
+          closeTo(7.0, 0.01)); // 3 + 4 = 7 (two segments)
 
       // Area of 3×4 right triangle = 6
       expect(provider.estimatedArea, closeTo(6.0, 0.01));

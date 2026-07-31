@@ -50,7 +50,8 @@ void main() {
       provider.selectPhoto(0);
       // First captured photo should be selected
       expect(provider.selectedPhoto, isNotNull);
-      expect(provider.selectedPhoto!.filePath, equals(provider.photos[0].filePath));
+      expect(provider.selectedPhoto!.filePath,
+          equals(provider.photos[0].filePath));
     });
 
     test('selectPhoto ignores invalid index', () async {
@@ -94,7 +95,8 @@ void main() {
       provider.addAnnotation(
         0,
         const PhotoAnnotation(
-          x: 100, y: 200,
+          x: 100,
+          y: 200,
           label: '5.2m',
           type: AnnotationType.dimension,
         ),
@@ -125,7 +127,8 @@ void main() {
         provider.addAnnotation(
           0,
           PhotoAnnotation(
-            x: i * 50.0, y: i * 50.0,
+            x: i * 50.0,
+            y: i * 50.0,
             label: '${i + 1}m',
             type: AnnotationType.dimension,
           ),
@@ -179,7 +182,8 @@ void main() {
 
     test('PhotoAnnotation serialization round-trip', () {
       const ann = PhotoAnnotation(
-        x: 50, y: 100,
+        x: 50,
+        y: 100,
         label: '4.5m',
         type: AnnotationType.area,
       );
@@ -245,19 +249,22 @@ class _FailingCameraService extends CameraService {
     double maxWidth = 1920,
     double maxHeight = 1080,
     int imageQuality = 85,
-  }) async => null;
+  }) async =>
+      null;
 
   @override
   Future<CapturedPhoto?> pickFromGallery({
     double maxWidth = 1920,
     double maxHeight = 1080,
     int imageQuality = 85,
-  }) async => null;
+  }) async =>
+      null;
 
   @override
   Future<List<CapturedPhoto>> pickMultiple({
     double maxWidth = 1920,
     double maxHeight = 1080,
     int imageQuality = 85,
-  }) async => [];
+  }) async =>
+      [];
 }

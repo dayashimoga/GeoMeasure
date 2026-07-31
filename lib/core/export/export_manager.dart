@@ -134,7 +134,11 @@ class ExportManager {
 
   /// Get list of supported formats for a given shape type.
   static List<ExportFormat> supportedFormats(SpatialShape? shape) {
-    final formats = <ExportFormat>[ExportFormat.csv, ExportFormat.json, ExportFormat.excel];
+    final formats = <ExportFormat>[
+      ExportFormat.csv,
+      ExportFormat.json,
+      ExportFormat.excel
+    ];
     if (shape != null) {
       formats.addAll([ExportFormat.dxf, ExportFormat.svg, ExportFormat.pdf]);
       if (shape is PlotShape) {

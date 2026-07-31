@@ -66,7 +66,15 @@ class ExcelExporter {
   static Uint8List exportTakeoff(QuantityTakeoff takeoff,
       {String sheetName = 'Quantity Takeoff'}) {
     final rows = <List<String>>[
-      ['Material', 'Quantity', 'Unit', 'Wastage %', 'Adjusted Qty', 'Unit Cost', 'Total Cost'],
+      [
+        'Material',
+        'Quantity',
+        'Unit',
+        'Wastage %',
+        'Adjusted Qty',
+        'Unit Cost',
+        'Total Cost'
+      ],
     ];
 
     for (final item in takeoff.items) {
@@ -83,7 +91,15 @@ class ExcelExporter {
 
     // Summary row
     rows.add([]);
-    rows.add(['Total Cost', '', '', '', '', '', takeoff.totalCost.toStringAsFixed(2)]);
+    rows.add([
+      'Total Cost',
+      '',
+      '',
+      '',
+      '',
+      '',
+      takeoff.totalCost.toStringAsFixed(2)
+    ]);
 
     return _generateXlsx(sheetName, rows);
   }
@@ -96,9 +112,18 @@ class ExcelExporter {
       ['Material Cost', estimate.materialCost.toStringAsFixed(2)],
       ['Labor Cost', estimate.laborCost.toStringAsFixed(2)],
       ['Subtotal', estimate.subtotal.toStringAsFixed(2)],
-      ['Overhead (${estimate.overheadPercent}%)', estimate.overhead.toStringAsFixed(2)],
-      ['Contingency (${estimate.contingencyPercent}%)', estimate.contingency.toStringAsFixed(2)],
-      ['Profit (${estimate.profitPercent}%)', estimate.profit.toStringAsFixed(2)],
+      [
+        'Overhead (${estimate.overheadPercent}%)',
+        estimate.overhead.toStringAsFixed(2)
+      ],
+      [
+        'Contingency (${estimate.contingencyPercent}%)',
+        estimate.contingency.toStringAsFixed(2)
+      ],
+      [
+        'Profit (${estimate.profitPercent}%)',
+        estimate.profit.toStringAsFixed(2)
+      ],
       [],
       ['Grand Total', estimate.grandTotal.toStringAsFixed(2)],
     ];
@@ -132,7 +157,8 @@ class ExcelExporter {
     // Build sheet XML
     final sheetXml = StringBuffer();
     sheetXml.writeln('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
-    sheetXml.writeln('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
+    sheetXml.writeln(
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
     sheetXml.writeln('<sheetData>');
     for (int r = 0; r < rows.length; r++) {
       sheetXml.write('<row r="${r + 1}">');
@@ -159,7 +185,8 @@ class ExcelExporter {
     // Shared strings XML
     final ssXml = StringBuffer();
     ssXml.writeln('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
-    ssXml.writeln('<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${allStrings.length}" uniqueCount="${allStrings.length}">');
+    ssXml.writeln(
+        '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${allStrings.length}" uniqueCount="${allStrings.length}">');
     for (final s in allStrings) {
       ssXml.writeln('<si><t>${_xmlEscape(s)}</t></si>');
     }
@@ -200,7 +227,8 @@ class ExcelExporter {
 <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
 </Relationships>''';
 
-    const contentTypesXml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    const contentTypesXml =
+        '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
 <Default Extension="xml" ContentType="application/xml"/>
@@ -234,12 +262,12 @@ class ExcelExporter {
     return result;
   }
 
-  static String _xmlEscape(String s) =>
-      s.replaceAll('&', '&amp;')
-       .replaceAll('<', '&lt;')
-       .replaceAll('>', '&gt;')
-       .replaceAll('"', '&quot;')
-       .replaceAll("'", '&apos;');
+  static String _xmlEscape(String s) => s
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
 
   /// Build a minimal ZIP archive from a map of filename → content.
   ///

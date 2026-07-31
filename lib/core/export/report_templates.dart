@@ -104,8 +104,7 @@ class InventoryItem {
     DateTime? countedAt,
   }) : countedAt = countedAt ?? DateTime.now();
 
-  double get totalVolume =>
-      quantity * unitLengthM * unitWidthM * unitHeightM;
+  double get totalVolume => quantity * unitLengthM * unitWidthM * unitHeightM;
 
   double get totalFloorArea => quantity * unitLengthM * unitWidthM;
 
@@ -136,8 +135,7 @@ class InventoryReport {
     this.inspector = '',
   }) : reportDate = reportDate ?? DateTime.now();
 
-  int get totalItemCount =>
-      items.fold(0, (sum, item) => sum + item.quantity);
+  int get totalItemCount => items.fold(0, (sum, item) => sum + item.quantity);
 
   double get totalVolumeM3 =>
       items.fold(0.0, (sum, item) => sum + item.totalVolume);
@@ -187,43 +185,26 @@ class InspectionReport {
   int get repairCount =>
       items.where((i) => i.status == InspectionStatus.needsRepair).length;
 
-  double get passRate =>
-      items.isEmpty ? 0.0 : (passCount / items.length) * 100;
+  double get passRate => items.isEmpty ? 0.0 : (passCount / items.length) * 100;
 
   /// Standard building inspection checklist template.
   static List<InspectionItem> buildingTemplate() => [
-        InspectionItem(
-            category: 'Structure', item: 'Foundation integrity'),
-        InspectionItem(
-            category: 'Structure', item: 'Wall cracks / damage'),
-        InspectionItem(
-            category: 'Structure', item: 'Roof condition'),
-        InspectionItem(
-            category: 'Structure', item: 'Floor levelness'),
-        InspectionItem(
-            category: 'Electrical', item: 'Wiring condition'),
-        InspectionItem(
-            category: 'Electrical', item: 'Circuit breaker panel'),
-        InspectionItem(
-            category: 'Electrical', item: 'Grounding system'),
-        InspectionItem(
-            category: 'Plumbing', item: 'Water supply pipes'),
-        InspectionItem(
-            category: 'Plumbing', item: 'Drainage system'),
-        InspectionItem(
-            category: 'Plumbing', item: 'Water heater'),
-        InspectionItem(
-            category: 'Safety', item: 'Fire extinguishers'),
-        InspectionItem(
-            category: 'Safety', item: 'Emergency exits'),
-        InspectionItem(
-            category: 'Safety', item: 'Smoke detectors'),
-        InspectionItem(
-            category: 'Exterior', item: 'Paint / cladding'),
-        InspectionItem(
-            category: 'Exterior', item: 'Windows & doors'),
-        InspectionItem(
-            category: 'Exterior', item: 'Parking / driveway'),
+        InspectionItem(category: 'Structure', item: 'Foundation integrity'),
+        InspectionItem(category: 'Structure', item: 'Wall cracks / damage'),
+        InspectionItem(category: 'Structure', item: 'Roof condition'),
+        InspectionItem(category: 'Structure', item: 'Floor levelness'),
+        InspectionItem(category: 'Electrical', item: 'Wiring condition'),
+        InspectionItem(category: 'Electrical', item: 'Circuit breaker panel'),
+        InspectionItem(category: 'Electrical', item: 'Grounding system'),
+        InspectionItem(category: 'Plumbing', item: 'Water supply pipes'),
+        InspectionItem(category: 'Plumbing', item: 'Drainage system'),
+        InspectionItem(category: 'Plumbing', item: 'Water heater'),
+        InspectionItem(category: 'Safety', item: 'Fire extinguishers'),
+        InspectionItem(category: 'Safety', item: 'Emergency exits'),
+        InspectionItem(category: 'Safety', item: 'Smoke detectors'),
+        InspectionItem(category: 'Exterior', item: 'Paint / cladding'),
+        InspectionItem(category: 'Exterior', item: 'Windows & doors'),
+        InspectionItem(category: 'Exterior', item: 'Parking / driveway'),
       ];
 
   Map<String, dynamic> toJson() => {

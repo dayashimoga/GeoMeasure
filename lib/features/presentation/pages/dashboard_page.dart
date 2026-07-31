@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../core/data/backup_service.dart';
-import '../../../core/config/app_config.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../capability_detection/domain/entities/capability_profile.dart';
 import '../../measurement_engine/domain/entities/measurement_algorithm.dart';
 import '../../measurement_engine/domain/entities/measurement_unit.dart';
 import '../../measurement_engine/domain/entities/spatial_shape.dart';
-import '../../measurement_engine/domain/services/geodetic_calculator.dart';
 import '../../measurement_engine/domain/services/unit_converter.dart';
+import '../widgets/export_panel.dart';
+import '../widgets/algorithm_banner.dart';
+import '../widgets/settings_tab.dart';
 import '../../estimation/domain/entities/material_estimate.dart';
 import '../../visualization/presentation/widgets/floor_plan_canvas.dart';
 import '../widgets/measurement_display.dart';
@@ -16,6 +16,10 @@ import 'gps_tracking_page.dart';
 import 'camera_measurement_page.dart';
 import 'measurement_history_page.dart';
 import 'measurement_wizard_page.dart';
+import 'quick_measure_page.dart';
+import 'multi_room_page.dart';
+import '../widgets/paint_tile_calculator.dart';
+import '../widgets/measurement_stats.dart';
 
 /// Consumer-grade Universal AI Measurement Platform Dashboard.
 ///
@@ -101,8 +105,7 @@ class _DashboardPageState extends State<DashboardPage>
           IconButton(
             icon: const Icon(Icons.history_rounded),
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (_) => const MeasurementHistoryPage()),
+              MaterialPageRoute(builder: (_) => const MeasurementHistoryPage()),
             ),
             tooltip: 'History',
           ),
@@ -184,6 +187,7 @@ class _DashboardPageState extends State<DashboardPage>
     return ListenableBuilder(
       listenable: sl.capabilityProvider,
       builder: (context, _) {
+        final theme = Theme.of(context);
         final profile = sl.capabilityProvider.profile;
 
         if (isWide) {
@@ -197,6 +201,8 @@ class _DashboardPageState extends State<DashboardPage>
                   child: Column(
                     children: [
                       _buildAlgorithmBanner(profile),
+                      const SizedBox(height: 12),
+                      _buildQuickToolsGrid(theme),
                       const SizedBox(height: 12),
                       _buildModeSelector(profile),
                       const SizedBox(height: 12),
@@ -215,6 +221,8 @@ class _DashboardPageState extends State<DashboardPage>
                     children: [
                       _buildUnitSelector(),
                       const SizedBox(height: 12),
+                      const MeasurementStats(),
+                      const SizedBox(height: 12),
                       _buildResultsPanel(),
                     ],
                   ),
@@ -230,6 +238,8 @@ class _DashboardPageState extends State<DashboardPage>
             children: [
               _buildAlgorithmBanner(profile),
               const SizedBox(height: 12),
+              _buildQuickToolsGrid(theme),
+              const SizedBox(height: 12),
               _buildUnitSelector(),
               const SizedBox(height: 12),
               _buildModeSelector(profile),
@@ -237,11 +247,153 @@ class _DashboardPageState extends State<DashboardPage>
               _buildFloorPlanToggle(),
               if (_showFloorPlan) _buildFloorPlanView(),
               const SizedBox(height: 12),
+              const MeasurementStats(),
+              const SizedBox(height: 12),
               _buildResultsPanel(),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildQuickToolsGrid(ThemeData theme) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'SPECIALIZED MEASUREMENT TOOLS',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _toolButton(
+                    theme: theme,
+                    icon: Icons.calculate_rounded,
+                    label: 'Quick Measure',
+                    subtitle: 'Direct shape input',
+                    color: theme.colorScheme.primary,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const QuickMeasurePage()),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _toolButton(
+                    theme: theme,
+                    icon: Icons.home_work_rounded,
+                    label: 'Multi-Room',
+                    subtitle: 'Full house survey',
+                    color: theme.colorScheme.secondary,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const MultiRoomPage()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _toolButton(
+                    theme: theme,
+                    icon: Icons.format_paint_rounded,
+                    label: 'Paint & Tiles',
+                    subtitle: 'Material quantities',
+                    color: theme.colorScheme.tertiary,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const PaintTileCalculator()),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _toolButton(
+                    theme: theme,
+                    icon: Icons.history_rounded,
+                    label: 'History & Logs',
+                    subtitle: 'Saved records',
+                    color: theme.colorScheme.outline,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const MeasurementHistoryPage()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _toolButton({
+    required ThemeData theme,
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Icon(icon, size: 22, color: color),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -265,7 +417,7 @@ class _DashboardPageState extends State<DashboardPage>
       ),
       child: Row(
         children: [
-          _PulsingDot(color: algoColor, isAnimating: isLoading),
+          PulsingDot(color: algoColor, isAnimating: isLoading),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -489,7 +641,9 @@ class _DashboardPageState extends State<DashboardPage>
               child: FilledButton.icon(
                 key: const Key('execute_measurement_button'),
                 onPressed: () => _showMeasurementInput(profile),
-                icon: const Icon(Icons.play_arrow_rounded),
+                icon: Icon(_selectedModeIndex == 2
+                    ? Icons.gps_fixed_rounded
+                    : Icons.play_arrow_rounded),
                 label: Text(_getExecuteButtonText()),
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -558,7 +712,7 @@ class _DashboardPageState extends State<DashboardPage>
             const SizedBox(height: 12),
             _buildMaterialEstimation(),
             const SizedBox(height: 12),
-            _buildExportButtons(),
+            const ExportPanel(),
             const SizedBox(height: 12),
             _buildNavigationButtons(),
           ],
@@ -674,8 +828,7 @@ class _DashboardPageState extends State<DashboardPage>
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (_) => const MeasurementHistoryPage()),
+              MaterialPageRoute(builder: (_) => const MeasurementHistoryPage()),
             ),
             icon: const Icon(Icons.history_rounded, size: 18),
             label: const Text('History'),
@@ -704,7 +857,10 @@ class _DashboardPageState extends State<DashboardPage>
         _showWallInput(profile);
         break;
       case 2:
-        _executeMeasurement(profile); // GPS uses preset coordinates
+        // Navigate to real GPS tracking for land measurement
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const GpsTrackingPage()),
+        );
         break;
       case 3:
         _showObjectInput(profile);
@@ -716,9 +872,9 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   void _showRoomInput(CapabilityProfile profile) {
-    final lengthCtrl = TextEditingController(text: '6.0');
-    final widthCtrl = TextEditingController(text: '4.5');
-    final heightCtrl = TextEditingController(text: '3.0');
+    final lengthCtrl = TextEditingController();
+    final widthCtrl = TextEditingController();
+    final heightCtrl = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -732,12 +888,24 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _dimensionField(
-                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            Text(
+              'Enter your room\'s actual dimensions. '
+              'Use a tape measure for best accuracy.',
+              style: TextStyle(
+                fontSize: 12,
+                color:
+                    Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded,
+                hint: 'e.g. 5.2'),
             const SizedBox(height: 12),
-            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
+            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded,
+                hint: 'e.g. 3.8'),
             const SizedBox(height: 12),
-            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
+            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded,
+                hint: 'e.g. 2.8'),
           ],
         ),
         actions: [
@@ -748,9 +916,23 @@ class _DashboardPageState extends State<DashboardPage>
           FilledButton.icon(
             icon: const Icon(Icons.calculate_rounded, size: 18),
             onPressed: () {
-              final l = double.tryParse(lengthCtrl.text) ?? 6.0;
-              final w = double.tryParse(widthCtrl.text) ?? 4.5;
-              final h = double.tryParse(heightCtrl.text) ?? 3.0;
+              final l = double.tryParse(lengthCtrl.text);
+              final w = double.tryParse(widthCtrl.text);
+              final h = double.tryParse(heightCtrl.text);
+              if (l == null ||
+                  w == null ||
+                  h == null ||
+                  l <= 0 ||
+                  w <= 0 ||
+                  h <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter valid positive dimensions'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               Navigator.of(ctx).pop();
               _runMeasurement(
                   profile,
@@ -772,8 +954,12 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   void _showWallInput(CapabilityProfile profile) {
-    final lengthCtrl = TextEditingController(text: '6.0');
-    final heightCtrl = TextEditingController(text: '3.0');
+    final lengthCtrl = TextEditingController();
+    final heightCtrl = TextEditingController();
+    final doorWCtrl = TextEditingController();
+    final doorHCtrl = TextEditingController();
+    final winWCtrl = TextEditingController();
+    final winHCtrl = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -784,14 +970,73 @@ class _DashboardPageState extends State<DashboardPage>
             Text('Wall Dimensions'),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _dimensionField(
-                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
-            const SizedBox(height: 12),
-            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Measure the wall with a tape measure or laser.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(ctx)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _dimensionField(
+                  lengthCtrl, 'Wall Length (m)', Icons.straighten_rounded,
+                  hint: 'e.g. 4.5'),
+              const SizedBox(height: 12),
+              _dimensionField(
+                  heightCtrl, 'Wall Height (m)', Icons.height_rounded,
+                  hint: 'e.g. 2.8'),
+              const SizedBox(height: 20),
+              Text(
+                'OPENINGS (optional)',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                  color: Theme.of(ctx).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _dimensionField(
+                        doorWCtrl, 'Door W', Icons.door_front_door_rounded,
+                        hint: '0.9'),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _dimensionField(
+                        doorHCtrl, 'Door H', Icons.door_front_door_rounded,
+                        hint: '2.1'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _dimensionField(
+                        winWCtrl, 'Window W', Icons.window_rounded,
+                        hint: '1.2'),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _dimensionField(
+                        winHCtrl, 'Window H', Icons.window_rounded,
+                        hint: '1.2'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -801,20 +1046,37 @@ class _DashboardPageState extends State<DashboardPage>
           FilledButton.icon(
             icon: const Icon(Icons.calculate_rounded, size: 18),
             onPressed: () {
-              final l = double.tryParse(lengthCtrl.text) ?? 6.0;
-              final h = double.tryParse(heightCtrl.text) ?? 3.0;
+              final l = double.tryParse(lengthCtrl.text);
+              final h = double.tryParse(heightCtrl.text);
+              if (l == null || h == null || l <= 0 || h <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter valid wall dimensions'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+              final openings = <WallOpening>[];
+              final dw = double.tryParse(doorWCtrl.text);
+              final dh = double.tryParse(doorHCtrl.text);
+              if (dw != null && dh != null && dw > 0 && dh > 0) {
+                openings.add(WallOpening(
+                    label: 'Door', widthMeters: dw, heightMeters: dh));
+              }
+              final ww = double.tryParse(winWCtrl.text);
+              final wh = double.tryParse(winHCtrl.text);
+              if (ww != null && wh != null && ww > 0 && wh > 0) {
+                openings.add(WallOpening(
+                    label: 'Window', widthMeters: ww, heightMeters: wh));
+              }
               Navigator.of(ctx).pop();
               _runMeasurement(
                   profile,
                   WallShape(
                     lengthMeters: l,
                     heightMeters: h,
-                    openings: const [
-                      WallOpening(
-                          label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
-                      WallOpening(
-                          label: 'Window', widthMeters: 1.2, heightMeters: 1.2),
-                    ],
+                    openings: openings,
                   ));
             },
             label: const Text('Measure'),
@@ -825,9 +1087,9 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   void _showObjectInput(CapabilityProfile profile) {
-    final lengthCtrl = TextEditingController(text: '2.0');
-    final widthCtrl = TextEditingController(text: '1.5');
-    final heightCtrl = TextEditingController(text: '1.0');
+    final lengthCtrl = TextEditingController();
+    final widthCtrl = TextEditingController();
+    final heightCtrl = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -841,12 +1103,23 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _dimensionField(
-                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
+            Text(
+              'Measure the object\'s length, width, and height.',
+              style: TextStyle(
+                fontSize: 12,
+                color:
+                    Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded,
+                hint: 'e.g. 1.8'),
             const SizedBox(height: 12),
-            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
+            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded,
+                hint: 'e.g. 0.6'),
             const SizedBox(height: 12),
-            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded),
+            _dimensionField(heightCtrl, 'Height (m)', Icons.height_rounded,
+                hint: 'e.g. 0.9'),
           ],
         ),
         actions: [
@@ -857,9 +1130,23 @@ class _DashboardPageState extends State<DashboardPage>
           FilledButton.icon(
             icon: const Icon(Icons.calculate_rounded, size: 18),
             onPressed: () {
-              final l = double.tryParse(lengthCtrl.text) ?? 2.0;
-              final w = double.tryParse(widthCtrl.text) ?? 1.5;
-              final h = double.tryParse(heightCtrl.text) ?? 1.0;
+              final l = double.tryParse(lengthCtrl.text);
+              final w = double.tryParse(widthCtrl.text);
+              final h = double.tryParse(heightCtrl.text);
+              if (l == null ||
+                  w == null ||
+                  h == null ||
+                  l <= 0 ||
+                  w <= 0 ||
+                  h <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter valid positive dimensions'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               Navigator.of(ctx).pop();
               _runMeasurement(
                   profile,
@@ -877,10 +1164,10 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   void _showBuildingInput(CapabilityProfile profile) {
-    final lengthCtrl = TextEditingController(text: '20.0');
-    final widthCtrl = TextEditingController(text: '15.0');
-    final floorsCtrl = TextEditingController(text: '3');
-    final floorHCtrl = TextEditingController(text: '3.0');
+    final lengthCtrl = TextEditingController();
+    final widthCtrl = TextEditingController();
+    final floorsCtrl = TextEditingController();
+    final floorHCtrl = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -894,15 +1181,28 @@ class _DashboardPageState extends State<DashboardPage>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              'Enter the building footprint and floor details.',
+              style: TextStyle(
+                fontSize: 12,
+                color:
+                    Theme.of(ctx).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _dimensionField(lengthCtrl, 'Length (m)', Icons.straighten_rounded,
+                hint: 'e.g. 20.0'),
+            const SizedBox(height: 12),
+            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded,
+                hint: 'e.g. 15.0'),
+            const SizedBox(height: 12),
             _dimensionField(
-                lengthCtrl, 'Length (m)', Icons.straighten_rounded),
-            const SizedBox(height: 12),
-            _dimensionField(widthCtrl, 'Width (m)', Icons.straighten_rounded),
-            const SizedBox(height: 12),
-            _dimensionField(floorsCtrl, 'Floors', Icons.layers_rounded),
+                floorsCtrl, 'Number of Floors', Icons.layers_rounded,
+                hint: 'e.g. 3'),
             const SizedBox(height: 12),
             _dimensionField(
-                floorHCtrl, 'Floor Height (m)', Icons.height_rounded),
+                floorHCtrl, 'Floor Height (m)', Icons.height_rounded,
+                hint: 'e.g. 3.0'),
           ],
         ),
         actions: [
@@ -913,10 +1213,26 @@ class _DashboardPageState extends State<DashboardPage>
           FilledButton.icon(
             icon: const Icon(Icons.calculate_rounded, size: 18),
             onPressed: () {
-              final l = double.tryParse(lengthCtrl.text) ?? 20.0;
-              final w = double.tryParse(widthCtrl.text) ?? 15.0;
-              final floors = int.tryParse(floorsCtrl.text) ?? 3;
-              final fh = double.tryParse(floorHCtrl.text) ?? 3.0;
+              final l = double.tryParse(lengthCtrl.text);
+              final w = double.tryParse(widthCtrl.text);
+              final floors = int.tryParse(floorsCtrl.text);
+              final fh = double.tryParse(floorHCtrl.text);
+              if (l == null ||
+                  w == null ||
+                  floors == null ||
+                  fh == null ||
+                  l <= 0 ||
+                  w <= 0 ||
+                  floors <= 0 ||
+                  fh <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter valid positive dimensions'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
               Navigator.of(ctx).pop();
               _runMeasurement(
                   profile,
@@ -937,12 +1253,14 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _dimensionField(
-      TextEditingController ctrl, String label, IconData icon) {
+      TextEditingController ctrl, String label, IconData icon,
+      {String? hint}) {
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: label,
+        hintText: hint,
         prefixIcon: Icon(icon, size: 20),
         isDense: true,
         border: const OutlineInputBorder(),
@@ -958,40 +1276,8 @@ class _DashboardPageState extends State<DashboardPage>
     setState(() => _showFloorPlan = true);
   }
 
-  void _executeMeasurement(CapabilityProfile profile) {
-    SpatialShape shape;
-    if (_selectedModeIndex == 0) {
-      shape = const RoomShape(
-        vertices: [
-          Point3D(0, 0),
-          Point3D(6, 0),
-          Point3D(6, 4.5),
-          Point3D(0, 4.5),
-        ],
-        heightMeters: 3.0,
-      );
-    } else if (_selectedModeIndex == 1) {
-      shape = const WallShape(
-        lengthMeters: 6.0,
-        heightMeters: 3.0,
-        openings: [
-          WallOpening(label: 'Door', widthMeters: 0.9, heightMeters: 2.1),
-          WallOpening(label: 'Window', widthMeters: 1.2, heightMeters: 1.2),
-        ],
-      );
-    } else {
-      shape = const PlotShape(
-        coordinates: [
-          GpsCoordinate(latitude: 37.7749, longitude: -122.4194),
-          GpsCoordinate(latitude: 37.7755, longitude: -122.4194),
-          GpsCoordinate(latitude: 37.7755, longitude: -122.4185),
-          GpsCoordinate(latitude: 37.7749, longitude: -122.4185),
-        ],
-      );
-    }
-
-    _runMeasurement(profile, shape);
-  }
+  // _executeMeasurement removed: Land mode now navigates to GPS tracking.
+  // Room/Wall/Object/Building modes use validated input dialogs.
 
   String _getExecuteButtonText() {
     switch (_selectedModeIndex) {
@@ -1000,7 +1286,7 @@ class _DashboardPageState extends State<DashboardPage>
       case 1:
         return 'Measure Wall';
       case 2:
-        return 'Measure Land Plot';
+        return 'Start GPS Land Survey';
       case 3:
         return 'Measure Object';
       case 4:
@@ -1008,80 +1294,6 @@ class _DashboardPageState extends State<DashboardPage>
       default:
         return 'Measure';
     }
-  }
-
-  Widget _buildExportButtons() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'EXPORT REPORTS & CAD',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.5),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _exportChip('PDF', Icons.picture_as_pdf_rounded, () {
-                  _showExportDialog('PDF Report',
-                      'PDF export ready.\nUse share button to save/send.');
-                }),
-                _exportChip('DXF', Icons.architecture_rounded, () {
-                  final str = sl.measurementProvider.exportCurrentToDxf();
-                  _showExportDialog('AutoCAD DXF', str);
-                }),
-                _exportChip('CSV', Icons.table_chart_rounded, () {
-                  final str = sl.measurementProvider.exportHistoryToCsv();
-                  _showExportDialog('CSV Schedule', str);
-                }),
-                _exportChip('SVG', Icons.image_rounded, () {
-                  _showExportDialog('SVG', 'SVG floor plan export ready.');
-                }),
-                _exportChip('GeoJSON', Icons.public_rounded, () {
-                  final str = sl.measurementProvider.exportPlotToGeoJson();
-                  _showExportDialog('GeoJSON',
-                      str.isNotEmpty ? str : 'Select Land mode first');
-                }),
-                _exportChip('KML', Icons.map_rounded, () {
-                  _showExportDialog('KML', 'KML export ready for Google Earth.');
-                }),
-                _exportChip('JSON', Icons.data_object_rounded, () {
-                  final result = sl.measurementProvider.lastResult;
-                  if (result != null) {
-                    _showExportDialog('JSON', result.toJson().toString());
-                  }
-                }),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _exportChip(String label, IconData icon, VoidCallback onTap) {
-    return ActionChip(
-      avatar: Icon(icon, size: 16),
-      label: Text(label, style: const TextStyle(fontSize: 13)),
-      onPressed: onTap,
-    );
   }
 
   // ━━━ Projects Tab ━━━
@@ -1257,283 +1469,6 @@ class _DashboardPageState extends State<DashboardPage>
 
   // ━━━ Settings Tab ━━━
   Widget _buildSettingsTab(ThemeData theme) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-      children: [
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.palette_rounded),
-                title: const Text('Dark Mode'),
-                trailing: Switch.adaptive(
-                  value: theme.brightness == Brightness.dark,
-                  onChanged: (_) => widget.onToggleTheme?.call(),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.grid_on_rounded),
-                title: const Text('Show Grid in Floor Plan'),
-                trailing: Switch.adaptive(
-                  value: _showFloorPlan,
-                  onChanged: (v) => setState(() => _showFloorPlan = v),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  'FEATURE FLAGS',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.2,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                ),
-              ),
-              ...sl.config.allFlags.entries.map((e) => SwitchListTile.adaptive(
-                    title: Text(e.key.replaceAll('_', ' '),
-                        style: const TextStyle(fontSize: 14)),
-                    value: e.value,
-                    dense: true,
-                    onChanged: (v) {
-                      setState(() => sl.config.setFeatureFlag(e.key, v));
-                    },
-                  )),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  'DATA MANAGEMENT & HARDWARE',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.2,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.backup_rounded,
-                    color: theme.colorScheme.primary),
-                title: const Text('Create Backup'),
-                subtitle: const Text('Export all projects & measurements'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () async {
-                  final backup = await BackupService.createBackup();
-                  final count = (backup['data'] as Map)
-                      .values
-                      .whereType<Map>()
-                      .fold<int>(0, (s, m) => s + m.length);
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Backup ready: $count items'),
-                    behavior: SnackBarBehavior.floating,
-                  ));
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.restore_rounded,
-                    color: theme.colorScheme.primary),
-                title: const Text('Restore from Backup'),
-                subtitle: const Text('Import from backup file'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Restore from Backup'),
-                      content: const Text(
-                        'Place a GeoMeasure backup file (.json) in your '
-                        'device storage, then use the file manager to open it.\n\n'
-                        'Filename format: geomeasure_backup_YYYYMMDD_HHMM.json',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.sensors_rounded,
-                    color: theme.colorScheme.primary),
-                title: const Text('Hardware Diagnostics'),
-                subtitle: const Text('View detected sensors & AI accelerators'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {
-                  final profile = sl.capabilityProvider.profile;
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (ctx) => DraggableScrollableSheet(
-                      initialChildSize: 0.6,
-                      maxChildSize: 0.9,
-                      minChildSize: 0.3,
-                      expand: false,
-                      builder: (_, ctrl) => ListView(
-                        controller: ctrl,
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                          Text('Hardware Diagnostics',
-                              style: theme.textTheme.titleLarge),
-                          const SizedBox(height: 8),
-                          ...profile.toJson().entries.map(
-                                (e) => ListTile(
-                                  dense: true,
-                                  title: Text(e.key),
-                                  trailing: Text(
-                                    e.value.toString(),
-                                    style: TextStyle(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('GeoMeasure v${AppConfig.appVersion}',
-                    key: const Key('app_version_text'),
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary)),
-                const SizedBox(height: 4),
-                Text(
-                  'Universal AI Spatial & Land Measurement Engine',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showExportDialog(String title, String content) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: SelectableText(
-              content,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 11,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.8),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Status dot indicator for sensor detection.
-class _PulsingDot extends StatelessWidget {
-  final Color color;
-  final bool isAnimating;
-
-  const _PulsingDot({required this.color, required this.isAnimating});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isAnimating ? 0.6 : 1.0),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.4),
-            blurRadius: isAnimating ? 10 : 6,
-            spreadRadius: isAnimating ? 2 : 0,
-          ),
-        ],
-      ),
-    );
+    return SettingsTab(onToggleTheme: widget.onToggleTheme);
   }
 }

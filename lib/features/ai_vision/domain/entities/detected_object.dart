@@ -3,21 +3,68 @@ import 'dart:math';
 /// Category of detected objects — covers all requested object types.
 enum ObjectCategory {
   // ── Furniture ──
-  chair, table, desk, sofa, bed, shelf, cabinet, drawer, wardrobe,
+  chair,
+  table,
+  desk,
+  sofa,
+  bed,
+  shelf,
+  cabinet,
+  drawer,
+  wardrobe,
   // ── Vehicles ──
-  car, bike, motorcycle, truck, bus, van, bicycle,
+  car,
+  bike,
+  motorcycle,
+  truck,
+  bus,
+  van,
+  bicycle,
   // ── Construction ──
-  brick, tile, roofSheet, pole, beam, column, pipe, rebar, scaffold,
+  brick,
+  tile,
+  roofSheet,
+  pole,
+  beam,
+  column,
+  pipe,
+  rebar,
+  scaffold,
   // ── Building elements ──
-  door, window, wall, floor, ceiling, roof, staircase, elevator,
+  door,
+  window,
+  wall,
+  floor,
+  ceiling,
+  roof,
+  staircase,
+  elevator,
   // ── Nature ──
-  tree, plant, flower, bush, grass,
+  tree,
+  plant,
+  flower,
+  bush,
+  grass,
   // ── People & Animals ──
-  person, animal, dog, cat,
+  person,
+  animal,
+  dog,
+  cat,
   // ── Inventory ──
-  box, package, pallet, container, crate, barrel, sack,
+  box,
+  package,
+  pallet,
+  container,
+  crate,
+  barrel,
+  sack,
   // ── Infrastructure ──
-  solarPanel, sign, fence, gate, lamp, hydrant,
+  solarPanel,
+  sign,
+  fence,
+  gate,
+  lamp,
+  hydrant,
   // ── Other ──
   unknown,
 }
@@ -116,12 +163,9 @@ class DetectedObject {
         boundingBox:
             BoundingBox.fromJson(m['boundingBox'] as Map<String, dynamic>),
         trackingId: m['trackingId'] as int? ?? -1,
-        estimatedWidthMeters:
-            (m['estimatedWidthMeters'] as num?)?.toDouble(),
-        estimatedHeightMeters:
-            (m['estimatedHeightMeters'] as num?)?.toDouble(),
-        estimatedDepthMeters:
-            (m['estimatedDepthMeters'] as num?)?.toDouble(),
+        estimatedWidthMeters: (m['estimatedWidthMeters'] as num?)?.toDouble(),
+        estimatedHeightMeters: (m['estimatedHeightMeters'] as num?)?.toDouble(),
+        estimatedDepthMeters: (m['estimatedDepthMeters'] as num?)?.toDouble(),
         estimatedDistanceMeters:
             (m['estimatedDistanceMeters'] as num?)?.toDouble(),
       );
@@ -196,14 +240,12 @@ class DetectionResult {
   }
 
   /// Total unique object count.
-  int get totalCount =>
-      countByCategory().fold(0, (sum, c) => sum + c.count);
+  int get totalCount => countByCategory().fold(0, (sum, c) => sum + c.count);
 
   /// Density: objects per unit area of image.
-  double get objectDensity =>
-      imageWidth > 0 && imageHeight > 0
-          ? objects.length / (imageWidth * imageHeight).toDouble()
-          : 0.0;
+  double get objectDensity => imageWidth > 0 && imageHeight > 0
+      ? objects.length / (imageWidth * imageHeight).toDouble()
+      : 0.0;
 
   /// Non-max suppression to remove overlapping detections.
   static List<DetectedObject> _removeDuplicates(
@@ -221,8 +263,7 @@ class DetectionResult {
       kept.add(sorted[i]);
       for (int j = i + 1; j < sorted.length; j++) {
         if (!suppressed[j] &&
-            sorted[i].boundingBox.iou(sorted[j].boundingBox) >
-                iouThreshold) {
+            sorted[i].boundingBox.iou(sorted[j].boundingBox) > iouThreshold) {
           suppressed[j] = true;
         }
       }
@@ -258,14 +299,11 @@ class SegmentationMask {
   });
 
   /// Pixel count belonging to this object.
-  int get objectPixelCount =>
-      maskData.where((v) => v > 0).length;
+  int get objectPixelCount => maskData.where((v) => v > 0).length;
 
   /// Object area as fraction of total image.
   double get areaFraction =>
-      width > 0 && height > 0
-          ? objectPixelCount / (width * height)
-          : 0.0;
+      width > 0 && height > 0 ? objectPixelCount / (width * height) : 0.0;
 }
 
 /// OCR text block detected in an image.

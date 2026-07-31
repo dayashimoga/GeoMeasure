@@ -44,8 +44,7 @@ class CertificatePinning {
             .join(':')
             .toUpperCase();
 
-        return pins.any((pin) =>
-            pin.toUpperCase() == certHash);
+        return pins.any((pin) => pin.toUpperCase() == certHash);
       };
     }
 
@@ -54,8 +53,7 @@ class CertificatePinning {
 
   /// Validates a certificate against pinned hashes.
   /// Returns true if the certificate is trusted.
-  static bool validateCertificate(
-      X509Certificate cert, String host, int port) {
+  static bool validateCertificate(X509Certificate cert, String host, int port) {
     final pins = _pinnedCerts[host];
     if (pins == null || pins.isEmpty) return true; // No pins = trust system
 

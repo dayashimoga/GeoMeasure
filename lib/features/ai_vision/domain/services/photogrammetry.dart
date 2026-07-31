@@ -24,8 +24,10 @@ class PhotogrammetryPipeline {
     final half = patchSize ~/ 2;
 
     for (final c1 in corners1) {
-      if (c1.x < half || c1.y < half ||
-          c1.x >= width - half || c1.y >= height - half) {
+      if (c1.x < half ||
+          c1.y < half ||
+          c1.x >= width - half ||
+          c1.y >= height - half) {
         continue;
       }
 
@@ -33,16 +35,23 @@ class PhotogrammetryPipeline {
       FeaturePoint? bestMatch;
 
       for (final c2 in corners2) {
-        if (c2.x < half || c2.y < half ||
-            c2.x >= width - half || c2.y >= height - half) {
+        if (c2.x < half ||
+            c2.y < half ||
+            c2.x >= width - half ||
+            c2.y >= height - half) {
           continue;
         }
 
         // NCC (normalized cross-correlation) between patches
         final ncc = _patchNcc(
-          image1Gray, c1.x, c1.y,
-          image2Gray, c2.x, c2.y,
-          width, patchSize,
+          image1Gray,
+          c1.x,
+          c1.y,
+          image2Gray,
+          c2.x,
+          c2.y,
+          width,
+          patchSize,
         );
 
         if (ncc > bestScore) {
@@ -148,10 +157,22 @@ class PhotogrammetryPipeline {
   }) {
     final corners = <FeaturePoint>[];
     const offsets = [
-      [0, -3], [1, -3], [2, -2], [3, -1],
-      [3, 0], [3, 1], [2, 2], [1, 3],
-      [0, 3], [-1, 3], [-2, 2], [-3, 1],
-      [-3, 0], [-3, -1], [-2, -2], [-1, -3],
+      [0, -3],
+      [1, -3],
+      [2, -2],
+      [3, -1],
+      [3, 0],
+      [3, 1],
+      [2, 2],
+      [1, 3],
+      [0, 3],
+      [-1, 3],
+      [-2, 2],
+      [-3, 1],
+      [-3, 0],
+      [-3, -1],
+      [-2, -2],
+      [-1, -3],
     ];
 
     for (int y = 3; y < height - 3; y++) {
@@ -160,7 +181,8 @@ class PhotogrammetryPipeline {
         int brighter = 0, darker = 0;
 
         for (final idx in [0, 4, 8, 12]) {
-          final px = gray[(y + offsets[idx][1]) * width + (x + offsets[idx][0])];
+          final px =
+              gray[(y + offsets[idx][1]) * width + (x + offsets[idx][0])];
           if (px > center + threshold) brighter++;
           if (px < center - threshold) darker++;
         }
@@ -171,8 +193,8 @@ class PhotogrammetryPipeline {
         int maxBright = 0, maxDark = 0;
         for (int i = 0; i < 32; i++) {
           final idx = i % 16;
-          final px = gray[(y + offsets[idx][1]) * width +
-              (x + offsets[idx][0])];
+          final px =
+              gray[(y + offsets[idx][1]) * width + (x + offsets[idx][0])];
           if (px > center + threshold) {
             contiguousBright++;
             contiguousDark = 0;
@@ -203,9 +225,14 @@ class PhotogrammetryPipeline {
 
   /// Normalized cross-correlation between two patches.
   static double _patchNcc(
-    Uint8List img1, int x1, int y1,
-    Uint8List img2, int x2, int y2,
-    int width, int patchSize,
+    Uint8List img1,
+    int x1,
+    int y1,
+    Uint8List img2,
+    int x2,
+    int y2,
+    int width,
+    int patchSize,
   ) {
     final half = patchSize ~/ 2;
     double sum1 = 0, sum2 = 0;
@@ -237,8 +264,12 @@ class PhotogrammetryPipeline {
 
   /// DLT point triangulation from two views.
   static PgPoint3D? _triangulatePoint(
-    double x1, double y1, CameraPose pose1,
-    double x2, double y2, CameraPose pose2,
+    double x1,
+    double y1,
+    CameraPose pose1,
+    double x2,
+    double y2,
+    CameraPose pose2,
   ) {
     final d1 = pose1.rotatePoint(PgPoint3D(x: x1, y: y1, z: 1.0));
     final d2 = pose2.rotatePoint(PgPoint3D(x: x2, y: y2, z: 1.0));
@@ -287,7 +318,8 @@ class PgPoint3D {
 class FeaturePoint {
   final int x, y;
   final double response;
-  const FeaturePoint({required this.x, required this.y, required this.response});
+  const FeaturePoint(
+      {required this.x, required this.y, required this.response});
 }
 
 /// A match between two feature points.
@@ -311,8 +343,7 @@ class CameraIntrinsics {
     required this.height,
   });
 
-  factory CameraIntrinsics.fromFov(
-      double fovDegrees, int width, int height) {
+  factory CameraIntrinsics.fromFov(double fovDegrees, int width, int height) {
     final fx = (width / 2) / tan(fovDegrees * pi / 360);
     return CameraIntrinsics(
       fx: fx,

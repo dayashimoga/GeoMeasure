@@ -57,14 +57,14 @@ class EdgeDetector {
 
     for (int y = 1; y < height - 1; y++) {
       for (int x = 1; x < width - 1; x++) {
-        ix[y * width + x] = (grayscale[y * width + x + 1] -
-                grayscale[y * width + x - 1])
-            .toDouble() /
-            2;
-        iy[y * width + x] = (grayscale[(y + 1) * width + x] -
-                grayscale[(y - 1) * width + x])
-            .toDouble() /
-            2;
+        ix[y * width + x] =
+            (grayscale[y * width + x + 1] - grayscale[y * width + x - 1])
+                    .toDouble() /
+                2;
+        iy[y * width + x] =
+            (grayscale[(y + 1) * width + x] - grayscale[(y - 1) * width + x])
+                    .toDouble() /
+                2;
       }
     }
 
@@ -153,8 +153,7 @@ class EdgeDetector {
         }
       }
       if (runStart >= 0 && width - runStart >= minLength) {
-        lines.add(LineSegment(
-            x1: runStart, y1: y, x2: width - 1, y2: y));
+        lines.add(LineSegment(x1: runStart, y1: y, x2: width - 1, y2: y));
       }
     }
 
@@ -178,8 +177,7 @@ class EdgeDetector {
         }
       }
       if (runStart >= 0 && height - runStart >= minLength) {
-        lines.add(LineSegment(
-            x1: x, y1: runStart, x2: x, y2: height - 1));
+        lines.add(LineSegment(x1: x, y1: runStart, x2: x, y2: height - 1));
       }
     }
 
@@ -208,8 +206,7 @@ class CornerPoint {
 
   const CornerPoint({required this.x, required this.y, required this.response});
 
-  Map<String, dynamic> toJson() =>
-      {'x': x, 'y': y, 'response': response};
+  Map<String, dynamic> toJson() => {'x': x, 'y': y, 'response': response};
 }
 
 /// A detected line segment.

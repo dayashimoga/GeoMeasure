@@ -189,8 +189,7 @@ class MeasurementResult {
       ceilingArea: (map['ceilingArea'] as num?)?.toDouble() ?? 0.0,
       roofArea: (map['roofArea'] as num?)?.toDouble() ?? 0.0,
       footprintArea: (map['footprintArea'] as num?)?.toDouble() ?? 0.0,
-      excavationVolume:
-          (map['excavationVolume'] as num?)?.toDouble() ?? 0.0,
+      excavationVolume: (map['excavationVolume'] as num?)?.toDouble() ?? 0.0,
       fillVolume: (map['fillVolume'] as num?)?.toDouble() ?? 0.0,
       cutVolume: (map['cutVolume'] as num?)?.toDouble() ?? 0.0,
       thickness: (map['thickness'] as num?)?.toDouble() ?? 0.0,
@@ -208,15 +207,11 @@ class MeasurementResult {
         orElse: () => ShapeType.rectangle,
       ),
       shapeName: map['shapeName'] as String? ?? '',
-      confidenceScore:
-          (map['confidenceScore'] as num?)?.toDouble() ?? 0.0,
-      errorMarginMeters:
-          (map['errorMarginMeters'] as num?)?.toDouble() ?? 0.0,
+      confidenceScore: (map['confidenceScore'] as num?)?.toDouble() ?? 0.0,
+      errorMarginMeters: (map['errorMarginMeters'] as num?)?.toDouble() ?? 0.0,
       sensorUsed: map['sensorUsed'] as String? ?? 'unknown',
-      measurementMethod:
-          map['measurementMethod'] as String? ?? 'direct',
-      calibrationStatus:
-          map['calibrationStatus'] as String? ?? 'uncalibrated',
+      measurementMethod: map['measurementMethod'] as String? ?? 'direct',
+      calibrationStatus: map['calibrationStatus'] as String? ?? 'uncalibrated',
       precisionMode: PrecisionMode.values.firstWhere(
         (e) => e.name == (map['precisionMode'] as String?),
         orElse: () => PrecisionMode.balanced,

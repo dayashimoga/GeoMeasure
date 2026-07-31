@@ -9,7 +9,15 @@ import '../measurement_engine/domain/entities/spatial_shape.dart';
 // Plug in ARCore (Android) or ARKit (iOS) via the ArEngine interface
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-enum ArSessionState { uninitialized, initializing, ready, tracking, paused, error }
+enum ArSessionState {
+  uninitialized,
+  initializing,
+  ready,
+  tracking,
+  paused,
+  error
+}
+
 enum ArPlaneType { horizontal, vertical, unknown }
 
 /// A detected surface in AR space.

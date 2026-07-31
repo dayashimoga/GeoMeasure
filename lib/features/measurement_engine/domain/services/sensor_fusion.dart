@@ -143,23 +143,24 @@ class SensorFusionEngine {
   }
 
   /// Confidence score based on sensor diversity and agreement.
-  double _calculateConfidence(
-      Map<SensorType, List<SensorReading>> groups) {
+  double _calculateConfidence(Map<SensorType, List<SensorReading>> groups) {
     if (groups.isEmpty) return 0.0;
 
     // More sensor types = higher confidence
-    final diversityScore = (groups.length / SensorType.values.length)
-        .clamp(0.0, 1.0);
+    final diversityScore =
+        (groups.length / SensorType.values.length).clamp(0.0, 1.0);
 
     // More readings = higher confidence (up to 50 readings)
     final volumeScore = (_buffer.length / 50.0).clamp(0.0, 1.0);
 
     // Recency score — how fresh is the latest reading?
     final now = DateTime.now();
-    final latestMs = _buffer.last.timestamp.difference(now).inMilliseconds.abs();
+    final latestMs =
+        _buffer.last.timestamp.difference(now).inMilliseconds.abs();
     final recencyScore = latestMs < 5000 ? 1.0 : (10000 - latestMs) / 10000;
 
-    return (diversityScore * 0.4 + volumeScore * 0.3 +
+    return (diversityScore * 0.4 +
+            volumeScore * 0.3 +
             recencyScore.clamp(0.0, 1.0) * 0.3)
         .clamp(0.0, 1.0);
   }

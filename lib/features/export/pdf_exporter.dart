@@ -273,8 +273,8 @@ class PdfExporter {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text('Metadata',
-              style:
-                  const pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+              style: const pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold, fontSize: 10)),
           pw.SizedBox(height: 4),
           pw.Text('Shape: ${result.shapeType.name}',
               style: const pw.TextStyle(fontSize: 9)),
@@ -320,7 +320,8 @@ class PdfExporter {
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
         pw.SizedBox(height: 2),
         pw.Text(value,
-            style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            style: const pw.TextStyle(
+                fontSize: 12, fontWeight: pw.FontWeight.bold)),
       ],
     );
   }

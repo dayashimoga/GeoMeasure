@@ -10,7 +10,8 @@ void main() {
       // Walk ~111m due north (0.001° latitude ≈ 111m)
       const start = GpsCoordinate(latitude: 12.9716, longitude: 77.5946);
       const end = GpsCoordinate(latitude: 12.9726, longitude: 77.5946);
-      final distance = GeodeticCalculator.calculateDistanceHaversine(start, end);
+      final distance =
+          GeodeticCalculator.calculateDistanceHaversine(start, end);
       expect(distance, closeTo(111, 5)); // ~111m per 0.001°
     });
 
@@ -18,10 +19,10 @@ void main() {
       // Walk a rectangle: N → E → S → W
       final waypoints = [
         const GpsCoordinate(latitude: 12.0, longitude: 77.0),
-        const GpsCoordinate(latitude: 12.001, longitude: 77.0),    // N
-        const GpsCoordinate(latitude: 12.001, longitude: 77.001),  // E
-        const GpsCoordinate(latitude: 12.0, longitude: 77.001),    // S
-        const GpsCoordinate(latitude: 12.0, longitude: 77.0),      // W (return)
+        const GpsCoordinate(latitude: 12.001, longitude: 77.0), // N
+        const GpsCoordinate(latitude: 12.001, longitude: 77.001), // E
+        const GpsCoordinate(latitude: 12.0, longitude: 77.001), // S
+        const GpsCoordinate(latitude: 12.0, longitude: 77.0), // W (return)
       ];
 
       double totalDistance = 0;
@@ -77,19 +78,26 @@ void main() {
 
     test('simulated elevation profile along path', () {
       final path = [
-        const GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100),
-        const GpsCoordinate(latitude: 12.001, longitude: 77.0, altitudeMeters: 150),
-        const GpsCoordinate(latitude: 12.002, longitude: 77.0, altitudeMeters: 130),
-        const GpsCoordinate(latitude: 12.003, longitude: 77.0, altitudeMeters: 200),
-        const GpsCoordinate(latitude: 12.004, longitude: 77.0, altitudeMeters: 180),
+        const GpsCoordinate(
+            latitude: 12.0, longitude: 77.0, altitudeMeters: 100),
+        const GpsCoordinate(
+            latitude: 12.001, longitude: 77.0, altitudeMeters: 150),
+        const GpsCoordinate(
+            latitude: 12.002, longitude: 77.0, altitudeMeters: 130),
+        const GpsCoordinate(
+            latitude: 12.003, longitude: 77.0, altitudeMeters: 200),
+        const GpsCoordinate(
+            latitude: 12.004, longitude: 77.0, altitudeMeters: 180),
       ];
       // Gain: +50, -20, +70, -20 => 120m gain
       expect(GeodeticCalculator.calculateElevationGain(path), equals(120.0));
     });
 
     test('simulated slope along steep hill', () {
-      const base = GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
-      const top = GpsCoordinate(latitude: 12.0001, longitude: 77.0, altitudeMeters: 110);
+      const base =
+          GpsCoordinate(latitude: 12.0, longitude: 77.0, altitudeMeters: 100);
+      const top = GpsCoordinate(
+          latitude: 12.0001, longitude: 77.0, altitudeMeters: 110);
       final slopeDeg = GeodeticCalculator.calculateSlopeDegrees(base, top);
       expect(slopeDeg, greaterThan(0));
       final slopePct = GeodeticCalculator.calculateSlopePercent(base, top);

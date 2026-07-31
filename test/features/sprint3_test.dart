@@ -103,8 +103,8 @@ void main() {
     });
 
     test('addVertex throws RangeError for invalid index', () {
-      expect(() => editor.addVertex(-1, const Point3D(0, 0, 0)),
-          throwsRangeError);
+      expect(
+          () => editor.addVertex(-1, const Point3D(0, 0, 0)), throwsRangeError);
     });
   });
 

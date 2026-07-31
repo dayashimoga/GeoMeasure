@@ -51,7 +51,10 @@ class GeoBounds {
 
   static int _latToTileY(double lat, int n) {
     final latRad = lat * 3.14159265358979 / 180.0;
-    final y = (1.0 - _ln(_tan(latRad) + 1.0 / _cos(latRad)) / 3.14159265358979) / 2.0 * n;
+    final y =
+        (1.0 - _ln(_tan(latRad) + 1.0 / _cos(latRad)) / 3.14159265358979) /
+            2.0 *
+            n;
     return y.floor().clamp(0, n - 1);
   }
 
@@ -204,8 +207,8 @@ class TileCacheStore {
     final regionBox = await Hive.openBox<String>(_regionBox);
     final regionJson = regionBox.get(regionId);
     if (regionJson != null) {
-      final region = CachedRegion.fromJson(
-          jsonDecode(regionJson) as Map<String, dynamic>);
+      final region =
+          CachedRegion.fromJson(jsonDecode(regionJson) as Map<String, dynamic>);
 
       // Remove tiles for this region's zoom/bounds
       final tileBox = await Hive.openBox<Uint8List>(_tileBox);

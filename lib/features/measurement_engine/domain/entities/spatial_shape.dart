@@ -266,8 +266,7 @@ class RoomShape extends IrregularPolygonShape {
   double get wallArea => calculatePerimeterInMeters() * heightMeters;
 
   @override
-  double calculateSurfaceArea() =>
-      floorArea + ceilingArea + wallArea;
+  double calculateSurfaceArea() => floorArea + ceilingArea + wallArea;
 }
 
 class PlotShape extends SpatialShape {
@@ -549,8 +548,7 @@ class SphereShape extends SpatialShape {
 
   /// 4πr².
   @override
-  double calculateSurfaceArea() =>
-      4 * pi * radiusMeters * radiusMeters;
+  double calculateSurfaceArea() => 4 * pi * radiusMeters * radiusMeters;
 
   double get diameterMeters => 2 * radiusMeters;
 }
@@ -594,15 +592,15 @@ class CuboidShape extends SpatialShape {
   /// 6 faces total.
   @override
   double calculateSurfaceArea() =>
-      2 * (lengthMeters * widthMeters +
+      2 *
+      (lengthMeters * widthMeters +
           lengthMeters * heightMeters +
           widthMeters * heightMeters);
 
   /// Diagonal of the box.
-  double get diagonalMeters =>
-      sqrt(lengthMeters * lengthMeters +
-          widthMeters * widthMeters +
-          heightMeters * heightMeters);
+  double get diagonalMeters => sqrt(lengthMeters * lengthMeters +
+      widthMeters * widthMeters +
+      heightMeters * heightMeters);
 }
 
 /// Cone — pointy top (funnel, traffic cone, conical roof).
@@ -739,8 +737,7 @@ class LShapeRoom extends SpatialShape {
   double get wallArea => calculatePerimeterInMeters() * heightMeters;
 
   @override
-  double calculateSurfaceArea() =>
-      2 * calculateAreaInSquareMeters() + wallArea;
+  double calculateSurfaceArea() => 2 * calculateAreaInSquareMeters() + wallArea;
 }
 
 /// Arch/Semicircular shape — bridges, doorways.
@@ -883,8 +880,8 @@ class HipRoofShape extends SpatialShape {
     // Two trapezoidal faces (if ridge > 0)
     final trapArea = 2 * ((lengthMeters + rl) / 2) * slopeLong;
     // Two triangular faces
-    final hipLength = sqrt(
-        (widthMeters / 2) * (widthMeters / 2) + riseMeters * riseMeters);
+    final hipLength =
+        sqrt((widthMeters / 2) * (widthMeters / 2) + riseMeters * riseMeters);
     final triArea = 2 * (widthMeters * hipLength / 2);
     return trapArea + triArea;
   }
@@ -974,7 +971,8 @@ class PipeShape extends SpatialShape {
   /// Cross-section area of the pipe wall (annular).
   @override
   double calculateAreaInSquareMeters() =>
-      pi * (outerRadiusMeters * outerRadiusMeters -
+      pi *
+      (outerRadiusMeters * outerRadiusMeters -
           innerRadiusMeters * innerRadiusMeters);
 
   /// Inner bore area.
@@ -1116,8 +1114,7 @@ class TShapeRoom extends SpatialShape {
   double get wallArea => calculatePerimeterInMeters() * heightMeters;
 
   @override
-  double calculateSurfaceArea() =>
-      2 * calculateAreaInSquareMeters() + wallArea;
+  double calculateSurfaceArea() => 2 * calculateAreaInSquareMeters() + wallArea;
 }
 
 /// U-shaped room — main rectangle with two parallel wings.
@@ -1165,9 +1162,7 @@ class UShapeRoom extends SpatialShape {
 
   @override
   double calculatePerimeterInMeters() =>
-      2 * mainLengthMeters +
-      4 * wingLengthMeters +
-      2 * wingWidthMeters;
+      2 * mainLengthMeters + 4 * wingLengthMeters + 2 * wingWidthMeters;
 
   @override
   double calculateVolumeInCubicMeters() =>
@@ -1182,7 +1177,5 @@ class UShapeRoom extends SpatialShape {
   double get wallArea => calculatePerimeterInMeters() * heightMeters;
 
   @override
-  double calculateSurfaceArea() =>
-      2 * calculateAreaInSquareMeters() + wallArea;
+  double calculateSurfaceArea() => 2 * calculateAreaInSquareMeters() + wallArea;
 }
-

@@ -17,9 +17,8 @@ class ObjectCounter {
   /// and removing duplicates via non-max suppression.
   List<ObjectCount> count(DetectionResult result) {
     // Filter by minimum confidence
-    final filtered = result.objects
-        .where((o) => o.confidence >= minConfidence)
-        .toList();
+    final filtered =
+        result.objects.where((o) => o.confidence >= minConfidence).toList();
 
     // Group by category
     final grouped = <ObjectCategory, List<DetectedObject>>{};
@@ -57,8 +56,7 @@ class ObjectCounter {
   /// Count objects of a specific category.
   int countCategory(DetectionResult result, ObjectCategory category) {
     final objs = result.objects
-        .where(
-            (o) => o.category == category && o.confidence >= minConfidence)
+        .where((o) => o.category == category && o.confidence >= minConfidence)
         .toList();
     return _nonMaxSuppression(objs).length;
   }
@@ -94,8 +92,7 @@ class ObjectCounter {
       kept.add(sorted[i]);
       for (int j = i + 1; j < sorted.length; j++) {
         if (!suppressed[j] &&
-            sorted[i].boundingBox.iou(sorted[j].boundingBox) >
-                iouThreshold) {
+            sorted[i].boundingBox.iou(sorted[j].boundingBox) > iouThreshold) {
           suppressed[j] = true;
         }
       }

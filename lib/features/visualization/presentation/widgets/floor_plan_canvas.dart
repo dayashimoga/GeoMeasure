@@ -175,9 +175,7 @@ class _FloorPlanCanvasState extends State<FloorPlanCanvas>
             child: CustomPaint(
               painter: _FloorPlanPainter(
                 shape: widget.shape,
-                vertices: widget.editable
-                    ? _editableVertices
-                    : widget.vertices,
+                vertices: widget.editable ? _editableVertices : widget.vertices,
                 scale: _scale,
                 offset: _offset,
                 showGrid: widget.showGrid,

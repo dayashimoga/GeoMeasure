@@ -61,12 +61,12 @@ class VisionServiceFactory {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
-        AppLogger().info(
-            'VisionService: Mobile platform — using Google ML Kit');
+        AppLogger()
+            .info('VisionService: Mobile platform — using Google ML Kit');
         return MlKitVisionService();
       default:
-        AppLogger().info(
-            'VisionService: Desktop platform — using local analysis');
+        AppLogger()
+            .info('VisionService: Desktop platform — using local analysis');
         return LocalVisionService();
     }
   }
@@ -113,8 +113,7 @@ class MlKitVisionService implements VisionService {
     try {
       return await mlKitCall();
     } catch (e) {
-      logger.warning(
-          '$_tag: $operation failed, using local fallback: $e',
+      logger.warning('$_tag: $operation failed, using local fallback: $e',
           tag: _tag);
       return fallbackCall();
     }
@@ -457,17 +456,17 @@ class LocalVisionService implements VisionService {
     final labels = <ImageLabel>[];
 
     if (avgBrightness > 200) {
-      labels.add(const ImageLabel(
-          label: 'bright_scene', confidence: 0.9, index: 0));
+      labels.add(
+          const ImageLabel(label: 'bright_scene', confidence: 0.9, index: 0));
     } else if (avgBrightness > 128) {
       labels.add(const ImageLabel(
           label: 'normal_lighting', confidence: 0.85, index: 0));
     } else if (avgBrightness > 50) {
-      labels.add(const ImageLabel(
-          label: 'dim_scene', confidence: 0.8, index: 0));
+      labels
+          .add(const ImageLabel(label: 'dim_scene', confidence: 0.8, index: 0));
     } else {
-      labels.add(const ImageLabel(
-          label: 'dark_scene', confidence: 0.9, index: 0));
+      labels.add(
+          const ImageLabel(label: 'dark_scene', confidence: 0.9, index: 0));
     }
 
     return labels;

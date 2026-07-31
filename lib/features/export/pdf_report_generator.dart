@@ -44,8 +44,7 @@ class PdfReportGenerator {
         _sectionTitle('Site Information'),
         _keyValue('Site Name', siteName),
         if (siteAddress != null) _keyValue('Address', siteAddress),
-        if (contractorName != null)
-          _keyValue('Contractor', contractorName),
+        if (contractorName != null) _keyValue('Contractor', contractorName),
         if (engineerName != null) _keyValue('Engineer', engineerName),
         _keyValue('Date', DateTime.now().toString().substring(0, 10)),
         pw.SizedBox(height: 16),
@@ -94,15 +93,13 @@ class PdfReportGenerator {
     pdf.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(40),
-      header: (ctx) =>
-          _header('Property Inspection Report', propertyAddress),
+      header: (ctx) => _header('Property Inspection Report', propertyAddress),
       footer: (ctx) => _footer(ctx.pageNumber, ctx.pagesCount),
       build: (ctx) => [
         _sectionTitle('Property Details'),
         _keyValue('Address', propertyAddress),
         _keyValue('Inspector', inspectorName),
-        if (licenseNumber != null)
-          _keyValue('License #', licenseNumber),
+        if (licenseNumber != null) _keyValue('License #', licenseNumber),
         _keyValue(
             'Inspection Date', DateTime.now().toString().substring(0, 10)),
         pw.SizedBox(height: 16),
@@ -190,25 +187,20 @@ class PdfReportGenerator {
         if (plotAreaSqm != null)
           _keyValue('Plot Area', '${plotAreaSqm.toStringAsFixed(2)} m²'),
         if (builtUpAreaSqm != null)
-          _keyValue(
-              'Built-Up Area', '${builtUpAreaSqm.toStringAsFixed(2)} m²'),
+          _keyValue('Built-Up Area', '${builtUpAreaSqm.toStringAsFixed(2)} m²'),
         if (zoning != null) _keyValue('Zoning', zoning),
         if (yearBuilt != null) _keyValue('Year Built', '$yearBuilt'),
         if (estimatedValuePerSqm != null && builtUpAreaSqm != null)
-          _keyValue(
-              'Estimated Value',
+          _keyValue('Estimated Value',
               '₹ ${(estimatedValuePerSqm * builtUpAreaSqm).toStringAsFixed(0)}'),
         pw.SizedBox(height: 16),
-
         if (buildingAnalysis != null) ...[
           _sectionTitle('Building Details'),
           _buildingAnalysisTable(buildingAnalysis),
           pw.SizedBox(height: 16),
         ],
-
         _sectionTitle('Room-wise Measurements'),
         _measurementSummaryTable(measurements),
-
         pw.SizedBox(height: 24),
         _signatureBlock(left: 'Surveyor', right: 'Property Owner'),
       ],
@@ -241,23 +233,18 @@ class PdfReportGenerator {
         _keyValue('Total Items',
             '${objectCounts.values.fold<int>(0, (s, v) => s + v)}'),
         pw.SizedBox(height: 16),
-
         _sectionTitle('Object Counts'),
         pw.TableHelper.fromTextArray(
           headerStyle: const pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 10,
               color: PdfColors.white),
-          headerDecoration:
-              const pw.BoxDecoration(color: PdfColors.teal800),
+          headerDecoration: const pw.BoxDecoration(color: PdfColors.teal800),
           cellStyle: const pw.TextStyle(fontSize: 10),
           cellPadding: const pw.EdgeInsets.all(6),
           headers: ['Object Type', 'Count'],
-          data: objectCounts.entries
-              .map((e) => [e.key, '${e.value}'])
-              .toList(),
+          data: objectCounts.entries.map((e) => [e.key, '${e.value}']).toList(),
         ),
-
         if (measurements != null && measurements.isNotEmpty) ...[
           pw.SizedBox(height: 16),
           _sectionTitle('Associated Measurements'),
@@ -283,8 +270,7 @@ class PdfReportGenerator {
     pdf.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(40),
-      header: (ctx) =>
-          _header('Material Estimation Report', projectName),
+      header: (ctx) => _header('Material Estimation Report', projectName),
       footer: (ctx) => _footer(ctx.pageNumber, ctx.pagesCount),
       build: (ctx) => [
         _sectionTitle('Project Information'),
@@ -292,22 +278,18 @@ class PdfReportGenerator {
         _keyValue('Date', DateTime.now().toString().substring(0, 10)),
         _keyValue('Line Items', '${takeoff.items.length}'),
         pw.SizedBox(height: 16),
-
         _sectionTitle('Bill of Quantities'),
         _takeoffTable(takeoff),
         pw.SizedBox(height: 16),
-
         if (costEstimate != null) ...[
           _sectionTitle('Cost Breakdown'),
           _costSummaryTable(costEstimate),
           pw.SizedBox(height: 16),
         ],
-
         if (measurements != null && measurements.isNotEmpty) ...[
           _sectionTitle('Source Measurements'),
           _measurementSummaryTable(measurements),
         ],
-
         pw.SizedBox(height: 24),
         _signatureBlock(left: 'Quantity Surveyor', right: 'Approved By'),
       ],
@@ -329,19 +311,18 @@ class PdfReportGenerator {
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.blue800)),
           pw.Text(DateTime.now().toString().substring(0, 16),
-              style:
-                  const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
         ],
       ),
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(title,
-              style: const pw.TextStyle(
-                  fontSize: 14, color: PdfColors.grey600)),
+              style:
+                  const pw.TextStyle(fontSize: 14, color: PdfColors.grey600)),
           pw.Text(subtitle,
-              style: const pw.TextStyle(
-                  fontSize: 10, color: PdfColors.grey500)),
+              style:
+                  const pw.TextStyle(fontSize: 10, color: PdfColors.grey500)),
         ],
       ),
       pw.Divider(color: PdfColors.blue200, thickness: 2),
@@ -356,11 +337,9 @@ class PdfReportGenerator {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text('Generated by GeoMeasure $_version',
-              style:
-                  const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
           pw.Text('Page $page of $total',
-              style:
-                  const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
         ],
       ),
     ]);
@@ -394,13 +373,10 @@ class PdfReportGenerator {
     );
   }
 
-  static pw.Widget _measurementSummaryTable(
-      List<MeasurementResult> results) {
+  static pw.Widget _measurementSummaryTable(List<MeasurementResult> results) {
     return pw.TableHelper.fromTextArray(
       headerStyle: const pw.TextStyle(
-          fontWeight: pw.FontWeight.bold,
-          fontSize: 9,
-          color: PdfColors.white),
+          fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.white),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.blue800),
       cellStyle: const pw.TextStyle(fontSize: 9),
       cellPadding: const pw.EdgeInsets.all(5),
@@ -422,9 +398,7 @@ class PdfReportGenerator {
   static pw.Widget _takeoffTable(QuantityTakeoff takeoff) {
     return pw.TableHelper.fromTextArray(
       headerStyle: const pw.TextStyle(
-          fontWeight: pw.FontWeight.bold,
-          fontSize: 9,
-          color: PdfColors.white),
+          fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.white),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
       cellStyle: const pw.TextStyle(fontSize: 9),
       cellPadding: const pw.EdgeInsets.all(5),
@@ -463,20 +437,17 @@ class PdfReportGenerator {
         _costRow('Labor Cost', estimate.laborCost),
         pw.Divider(color: PdfColors.grey200),
         _costRow('Subtotal', estimate.subtotal),
-        _costRow(
-            'Overhead (${estimate.overheadPercent}%)', estimate.overhead),
+        _costRow('Overhead (${estimate.overheadPercent}%)', estimate.overhead),
         _costRow('Contingency (${estimate.contingencyPercent}%)',
             estimate.contingency),
-        _costRow(
-            'Profit (${estimate.profitPercent}%)', estimate.profit),
+        _costRow('Profit (${estimate.profitPercent}%)', estimate.profit),
         pw.Divider(color: PdfColors.blue800, thickness: 2),
         _costRow('Grand Total', estimate.grandTotal, bold: true),
       ]),
     );
   }
 
-  static pw.Widget _costRow(String label, double amount,
-      {bool bold = false}) {
+  static pw.Widget _costRow(String label, double amount, {bool bold = false}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
@@ -509,16 +480,15 @@ class PdfReportGenerator {
             '${analysis.lengthMeters.toStringAsFixed(1)} × ${analysis.widthMeters.toStringAsFixed(1)} × ${analysis.heightMeters.toStringAsFixed(1)} m'),
         _keyValue('Floors', '${analysis.numberOfFloors}'),
         _keyValue('Roof Type', analysis.roofType.name),
-        _keyValue('Footprint',
-            '${analysis.footprintAreaSqm.toStringAsFixed(2)} m²'),
+        _keyValue(
+            'Footprint', '${analysis.footprintAreaSqm.toStringAsFixed(2)} m²'),
         _keyValue('Total Floor Area',
             '${analysis.totalFloorAreaSqm.toStringAsFixed(2)} m²'),
         if (analysis.floorAreaRatio > 0)
           _keyValue('FAR', analysis.floorAreaRatio.toStringAsFixed(2)),
         if (analysis.windowCount > 0)
           _keyValue('Windows', '${analysis.windowCount}'),
-        if (analysis.doorCount > 0)
-          _keyValue('Doors', '${analysis.doorCount}'),
+        if (analysis.doorCount > 0) _keyValue('Doors', '${analysis.doorCount}'),
       ]),
     );
   }

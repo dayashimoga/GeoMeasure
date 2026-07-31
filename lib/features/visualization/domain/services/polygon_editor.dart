@@ -10,8 +10,7 @@ class PolygonEditor {
   final List<List<Point3D>> _history = [];
   int _historyIndex = -1;
 
-  PolygonEditor(List<Point3D> vertices)
-      : _vertices = List.of(vertices) {
+  PolygonEditor(List<Point3D> vertices) : _vertices = List.of(vertices) {
     _pushHistory();
   }
 
@@ -70,7 +69,8 @@ class PolygonEditor {
       throw StateError('Cannot delete vertex: minimum 3 vertices required');
     }
     if (index < 0 || index >= _vertices.length) {
-      throw RangeError('Index $index out of range [0, ${_vertices.length - 1}]');
+      throw RangeError(
+          'Index $index out of range [0, ${_vertices.length - 1}]');
     }
     _vertices.removeAt(index);
     _pushHistory();
@@ -108,8 +108,10 @@ class PolygonEditor {
   /// Rotate all vertices around centroid by given angle in degrees.
   List<Point3D> rotate(double angleDegrees) {
     if (_vertices.isEmpty) return vertices;
-    final cx = _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
-    final cy = _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
+    final cx =
+        _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
+    final cy =
+        _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
     final rad = angleDegrees * math.pi / 180.0;
     final cosA = math.cos(rad);
     final sinA = math.sin(rad);
@@ -130,8 +132,10 @@ class PolygonEditor {
   /// Scale all vertices from centroid by given factor.
   List<Point3D> scale(double factor) {
     if (_vertices.isEmpty || factor <= 0) return vertices;
-    final cx = _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
-    final cy = _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
+    final cx =
+        _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
+    final cy =
+        _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
 
     _vertices = _vertices.map((v) {
       return Point3D(
@@ -159,11 +163,13 @@ class PolygonEditor {
 
   /// Snap all vertices to grid.
   List<Point3D> snapAll(double gridSize) {
-    _vertices = _vertices.map((v) => Point3D(
-      (v.x / gridSize).round() * gridSize,
-      (v.y / gridSize).round() * gridSize,
-      v.z,
-    )).toList();
+    _vertices = _vertices
+        .map((v) => Point3D(
+              (v.x / gridSize).round() * gridSize,
+              (v.y / gridSize).round() * gridSize,
+              v.z,
+            ))
+        .toList();
     _pushHistory();
     return vertices;
   }
@@ -171,9 +177,10 @@ class PolygonEditor {
   /// Calculate the centroid of the polygon.
   Point3D get centroid {
     if (_vertices.isEmpty) return const Point3D(0, 0, 0);
-    final cx = _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
-    final cy = _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
+    final cx =
+        _vertices.map((v) => v.x).reduce((a, b) => a + b) / _vertices.length;
+    final cy =
+        _vertices.map((v) => v.y).reduce((a, b) => a + b) / _vertices.length;
     return Point3D(cx, cy, 0);
   }
-
 }

@@ -78,8 +78,7 @@ class PhotoAnnotation {
         'type': type.name,
       };
 
-  factory PhotoAnnotation.fromJson(Map<String, dynamic> map) =>
-      PhotoAnnotation(
+  factory PhotoAnnotation.fromJson(Map<String, dynamic> map) => PhotoAnnotation(
         x: (map['x'] as num).toDouble(),
         y: (map['y'] as num).toDouble(),
         label: map['label'] as String,
@@ -157,9 +156,7 @@ class CameraService {
         maxHeight: maxHeight,
         imageQuality: imageQuality,
       );
-      return files
-          .map((f) => CapturedPhoto(filePath: f.path))
-          .toList();
+      return files.map((f) => CapturedPhoto(filePath: f.path)).toList();
     } catch (e) {
       logger.error('Multi-pick failed', error: e, tag: 'Camera');
       return [];

@@ -49,18 +49,57 @@ class MaterialEstimate {
   });
 
   /// Quantity including wastage.
-  double get adjustedQuantity =>
-      quantity * (1 + wastagePercent / 100);
+  double get adjustedQuantity => quantity * (1 + wastagePercent / 100);
 
-  /// Total cost = adjusted quantity × unit cost.
-  double get totalCost => adjustedQuantity * unitCost;
+  /// Effective unit cost, using industry default if not specified.
+  double get effectiveUnitCost =>
+      unitCost > 0 ? unitCost : getDefaultUnitCost(material);
+
+  /// Total cost = adjusted quantity × effective unit cost.
+  double get totalCost => adjustedQuantity * effectiveUnitCost;
+
+  /// Default unit prices in INR for standard construction materials.
+  static double getDefaultUnitCost(MaterialType type) {
+    switch (type) {
+      case MaterialType.concrete:
+        return 4500.0; // ₹/m³
+      case MaterialType.cement:
+        return 380.0; // ₹/bag
+      case MaterialType.sand:
+        return 1200.0; // ₹/m³
+      case MaterialType.gravel:
+        return 1400.0; // ₹/m³
+      case MaterialType.brick:
+        return 9.0; // ₹/piece
+      case MaterialType.steel:
+        return 68.0; // ₹/kg
+      case MaterialType.wood:
+        return 1500.0; // ₹/m³
+      case MaterialType.paint:
+        return 350.0; // ₹/litre
+      case MaterialType.tile:
+        return 55.0; // ₹/piece
+      case MaterialType.glass:
+        return 1200.0; // ₹/m²
+      case MaterialType.plumbing:
+        return 500.0;
+      case MaterialType.electrical:
+        return 400.0;
+      case MaterialType.plaster:
+        return 3200.0; // ₹/m³
+      case MaterialType.waterproofing:
+        return 250.0; // ₹/m²
+      case MaterialType.insulation:
+        return 300.0; // ₹/m²
+    }
+  }
 
   Map<String, dynamic> toJson() => {
         'material': material.name,
         'quantity': quantity,
         'adjustedQuantity': adjustedQuantity,
         'unit': unit.name,
-        'unitCost': unitCost,
+        'unitCost': effectiveUnitCost,
         'wastagePercent': wastagePercent,
         'totalCost': totalCost,
       };
@@ -78,8 +117,7 @@ class QuantityTakeoff {
     DateTime? generatedAt,
   }) : generatedAt = generatedAt ?? DateTime.now();
 
-  double get totalCost =>
-      items.fold(0.0, (sum, i) => sum + i.totalCost);
+  double get totalCost => items.fold(0.0, (sum, i) => sum + i.totalCost);
 
   int get lineItemCount => items.length;
 
@@ -113,8 +151,7 @@ class CostEstimate {
   double get overhead => subtotal * overheadPercent / 100;
   double get contingency => subtotal * contingencyPercent / 100;
   double get profit => subtotal * profitPercent / 100;
-  double get grandTotal =>
-      subtotal + overhead + contingency + profit;
+  double get grandTotal => subtotal + overhead + contingency + profit;
 
   Map<String, dynamic> toJson() => {
         'materialCost': materialCost,
@@ -219,8 +256,12 @@ class MaterialEstimator {
         // Column concrete (4 columns per 25m², 300×300mm, full height)
         MaterialEstimate(
           material: MaterialType.concrete,
-          quantity: (footprint / 25).ceil() * 4 * 0.3 * 0.3 *
-              building.totalHeight * 1.54,
+          quantity: (footprint / 25).ceil() *
+              4 *
+              0.3 *
+              0.3 *
+              building.totalHeight *
+              1.54,
           unit: MaterialUnit.cubicMeters,
           wastagePercent: 3,
         ),
@@ -293,8 +334,7 @@ class MaterialEstimator {
   }
 
   /// Estimate paint needed for a surface area.
-  static MaterialEstimate estimatePaint(double areaSqm,
-      {int coats = 2}) {
+  static MaterialEstimate estimatePaint(double areaSqm, {int coats = 2}) {
     // 1 litre covers ~10 m² per coat
     return MaterialEstimate(
       material: MaterialType.paint,

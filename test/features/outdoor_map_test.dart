@@ -139,7 +139,8 @@ void main() {
     });
 
     test('copyWith modifies opacity', () {
-      final layer = MapLayer(name: 'Overlay', provider: EsriSatelliteProvider());
+      final layer =
+          MapLayer(name: 'Overlay', provider: EsriSatelliteProvider());
       final semi = layer.copyWith(opacity: 0.5);
       expect(semi.opacity, equals(0.5));
     });

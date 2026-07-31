@@ -10,6 +10,7 @@ import '../../core/logging/app_logger.dart';
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 enum SyncStatus { idle, syncing, success, error, conflict }
+
 enum ConflictStrategy { serverWins, clientWins, lastWriteWins }
 
 /// A versioned syncable entity for offline-first sync.
